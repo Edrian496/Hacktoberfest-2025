@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  web:
+    build: ../apps/web
+    ports:
+      - "3000:3000"
+
+  ai-service:
+    build: ../apps/ai-service
+    ports:
+      - "8000:8000"
+
+  lisk-chain:
+    build: ../apps/lisk-chain
+    ports:
+      - "4000:4000"

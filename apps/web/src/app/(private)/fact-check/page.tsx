@@ -1,0 +1,445 @@
+"use client";
+
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Sparkles,
+  Eye,
+} from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+interface FactCheckAdminProps {
+  onNavigate: (page: string) => void;
+  currentPage: string;
+}
+
+export default function FactCheckAdmin({
+  onNavigate,
+  currentPage,
+}: FactCheckAdminProps) {
+  const [inputType, setInputType] = useState<"text" | "url">("text");
+  const [textInput, setTextInput] = useState("");
+  const [urlInput, setUrlInput] = useState("");
+  const [result, setResult] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
+  const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
+
+  const [submissions] = useState([
+    {
+      id: "1",
+      content:
+        "Earthquake magnitude 7.8 reported in Northern Region at 5:30 AM...",
+      source: "User Submission",
+      verdict: "true",
+      confidence: 92,
+      status: "Approved",
+      date: "Oct 4, 2025",
+    },
+    {
+      id: "2",
+      content:
+        "Unverified claim about additional tremors expected in coastal areas...",
+      source: "News URL",
+      verdict: "false",
+      confidence: 88,
+      status: "Approved",
+      date: "Oct 3, 2025",
+    },
+    {
+      id: "3",
+      content: "Donation funds being misused by relief organizations...",
+      source: "Social Media",
+      verdict: "misleading",
+      confidence: 75,
+      status: "Pending Review",
+      date: "Oct 3, 2025",
+    },
+    {
+      id: "4",
+      content:
+        "Government announces $10M emergency relief package for affected areas...",
+      source: "News Article",
+      verdict: "true",
+      confidence: 95,
+      status: "Approved",
+      date: "Oct 2, 2025",
+    },
+  ]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    setTimeout(() => {
+      const mockResults = [
+        {
+          verdict: "true",
+          confidence: 92,
+          explanation:
+            "This information has been verified against multiple reliable sources.",
+        },
+        {
+          verdict: "false",
+          confidence: 88,
+          explanation:
+            "This claim has been identified as misinformation from cross-checking.",
+        },
+        {
+          verdict: "misleading",
+          confidence: 75,
+          explanation:
+            "Contains some factual elements but presented misleadingly.",
+        },
+      ];
+
+      const randomResult =
+        mockResults[Math.floor(Math.random() * mockResults.length)];
+      setResult(randomResult);
+      setIsLoading(false);
+    }, 2000);
+  };
+
+  const handleReview = (submission: any) => {
+    setSelectedSubmission(submission);
+    setIsReviewDialogOpen(true);
+  };
+
+  const getVerdictBadge = (verdict: string) => {
+    switch (verdict) {
+      case "true":
+        return (
+          <Badge className="bg-secondary/20 text-secondary-foreground border-secondary">
+            <CheckCircle className="w-3 h-3 mr-1" />
+            True
+          </Badge>
+        );
+      case "false":
+        return (
+          <Badge variant="destructive">
+            <XCircle className="w-3 h-3 mr-1" />
+            False
+          </Badge>
+        );
+      case "misleading":
+        return (
+          <Badge className="bg-warning/20 text-warning-foreground border-warning">
+            <AlertTriangle className="w-3 h-3 mr-1" />
+            Misleading
+          </Badge>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="flex min-h-screen bg-background">
+      {/* Main content */}
+      <main className="flex-1 p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Page header */}
+          <div className="mb-8">
+            <h1 className="mb-2">Fact-Check Management</h1>
+            <p className="text-muted-foreground">
+              Review and verify disaster-related information submissions
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left section */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Verify new content */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Verify New Content</CardTitle>
+                  <CardDescription>
+                    Submit content for AI-powered fact-checking
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <Tabs
+                      value={inputType}
+                      onValueChange={(v) => setInputType(v as "text" | "url")}
+                    >
+                      <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="text">Text Input</TabsTrigger>
+                        <TabsTrigger value="url">URL</TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value="text" className="space-y-4">
+                        <Label htmlFor="admin-text-input">
+                          Content to Verify
+                        </Label>
+                        <Textarea
+                          id="admin-text-input"
+                          placeholder="Enter content to fact-check..."
+                          value={textInput}
+                          onChange={(e) => setTextInput(e.target.value)}
+                          rows={6}
+                          required={inputType === "text"}
+                        />
+                      </TabsContent>
+
+                      <TabsContent value="url" className="space-y-4">
+                        <Label htmlFor="admin-url-input">Article URL</Label>
+                        <Input
+                          id="admin-url-input"
+                          type="url"
+                          placeholder="https://example.com/article"
+                          value={urlInput}
+                          onChange={(e) => setUrlInput(e.target.value)}
+                          required={inputType === "url"}
+                        />
+                      </TabsContent>
+                    </Tabs>
+
+                    <Button
+                      type="submit"
+                      className="w-full bg-primary hover:bg-primary/90"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Sparkles className="mr-2 w-4 h-4 animate-pulse" />
+                          Analyzing...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="mr-2 w-4 h-4" />
+                          Analyze Content
+                        </>
+                      )}
+                    </Button>
+                  </form>
+
+                  {result && (
+                    <div className="mt-6 space-y-4 p-4 border rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <h4>AI Analysis Result</h4>
+                        {getVerdictBadge(result.verdict)}
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-1">
+                        Confidence: {result.confidence}%
+                      </p>
+                      <p className="text-sm">{result.explanation}</p>
+                      <div className="flex gap-2">
+                        <Button className="flex-1 bg-secondary hover:bg-secondary/90">
+                          Approve & Publish
+                        </Button>
+                        <Button variant="outline" className="flex-1">
+                          Edit Result
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Submissions list */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>All Submissions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Content</TableHead>
+                        <TableHead>Source</TableHead>
+                        <TableHead>Verdict</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {submissions.map((submission) => (
+                        <TableRow key={submission.id}>
+                          <TableCell className="max-w-xs">
+                            <div className="line-clamp-2 text-sm">
+                              {submission.content}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {submission.source}
+                          </TableCell>
+                          <TableCell>
+                            {getVerdictBadge(submission.verdict)}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                submission.status === "Approved"
+                                  ? "secondary"
+                                  : "outline"
+                              }
+                            >
+                              {submission.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {submission.date}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleReview(submission)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Right section (stats + quick actions) */}
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Statistics</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Total Submissions
+                    </p>
+                    <p className="text-2xl">{submissions.length}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Verified True
+                    </p>
+                    <p className="text-2xl text-secondary">
+                      {submissions.filter((s) => s.verdict === "true").length}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Flagged False
+                    </p>
+                    <p className="text-2xl text-destructive">
+                      {submissions.filter((s) => s.verdict === "false").length}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Pending Review
+                    </p>
+                    <p className="text-2xl text-warning">
+                      {
+                        submissions.filter((s) => s.status === "Pending Review")
+                          .length
+                      }
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <Button variant="outline" className="w-full justify-start">
+                    Export Reports
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    View Analytics
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    Settings
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Review dialog */}
+      <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Review Submission</DialogTitle>
+            <DialogDescription>
+              Review and approve or edit the AI fact-check result
+            </DialogDescription>
+          </DialogHeader>
+          {selectedSubmission && (
+            <div className="space-y-4">
+              <div>
+                <Label>Content</Label>
+                <p className="text-sm mt-1">{selectedSubmission.content}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Source</Label>
+                  <p className="text-sm mt-1">{selectedSubmission.source}</p>
+                </div>
+                <div>
+                  <Label>Verdict</Label>
+                  <div className="mt-1">
+                    {getVerdictBadge(selectedSubmission.verdict)}
+                  </div>
+                </div>
+              </div>
+              <div>
+                <Label>Confidence Score</Label>
+                <p className="text-sm mt-1">{selectedSubmission.confidence}%</p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsReviewDialogOpen(false)}
+            >
+              Close
+            </Button>
+            <Button variant="outline">Edit</Button>
+            <Button className="bg-secondary hover:bg-secondary/90">
+              Approve
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
