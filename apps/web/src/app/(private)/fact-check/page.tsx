@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import axios from "axios";
+
 import {
   Card,
   CardContent,
@@ -97,38 +99,79 @@ export default function FactCheckAdmin({
     },
   ]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  // Validate before sending
+  if (inputType === "text") {
+    if (!textInput || textInput.trim() === "") {
+      alert("Please enter text to fact-check");
+      return;
+    }
+  } else {
+    if (!urlInput || urlInput.trim() === "") {
+      alert("Please enter a URL to fact-check");
+      return;
+    }
+  }
+  
+  setIsLoading(true);
+  
+  try {
+    const payload = inputType === "text" 
+      ? { text: textInput.trim() }
+      : { url: urlInput.trim() };
 
-    setTimeout(() => {
-      const mockResults = [
-        {
-          verdict: "true",
-          confidence: 92,
-          explanation:
-            "This information has been verified against multiple reliable sources.",
-        },
-        {
-          verdict: "false",
-          confidence: 88,
-          explanation:
-            "This claim has been identified as misinformation from cross-checking.",
-        },
-        {
-          verdict: "misleading",
-          confidence: 75,
-          explanation:
-            "Contains some factual elements but presented misleadingly.",
-        },
-      ];
 
-      const randomResult =
-        mockResults[Math.floor(Math.random() * mockResults.length)];
-      setResult(randomResult);
-      setIsLoading(false);
-    }, 2000);
-  };
+    //Debug payload
+    console.log("Sending payload:", payload); 
+    
+    const response = await axios.post("http://localhost:8000/fact-check", payload);
+    
+    setResult({
+      verdict: response.data.verdict,
+      confidence: response.data.confidence,
+      explanation: response.data.explanation,
+      related_article: response.data.related_article,
+    });
+    
+} catch (error) {
+  console.error("Full error:", error);
+  if (axios.isAxiosError(error)) {
+    const detail = error.response?.data?.detail;
+    console.error("Response data:", error.response?.data);
+    console.error("Detail array:", detail);
+    
+    // Log each error in detail
+    if (Array.isArray(detail)) {
+      detail.forEach((err, index) => {
+        console.error(`Error ${index}:`, {
+          location: err.loc,
+          message: err.msg,
+          type: err.type,
+          input: err.input
+        });
+      });
+    }
+      
+      // Format FastAPI validation errors
+      const errorDetail = error.response?.data?.detail;
+      if (Array.isArray(errorDetail)) {
+        const errorMessages = errorDetail.map((err: any) => 
+          `Field: ${err.loc?.join('.')}, Error: ${err.msg}, Type: ${err.type}`
+        ).join('\n');
+        alert(`Validation Error:\n\n${errorMessages}`);
+      } else {
+        alert(`Error: ${JSON.stringify(error.response?.data)}`);
+      }
+    } else {
+      alert("Network error - make sure backend is running on port 8000");
+    }
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   const handleReview = (submission: any) => {
     setSelectedSubmission(submission);
@@ -254,7 +297,22 @@ export default function FactCheckAdmin({
                         Confidence: {result.confidence}%
                       </p>
                       <p className="text-sm">{result.explanation}</p>
-                      <div className="flex gap-2">
+
+                      {result.related_article && result.related_article.url && (
+                        <div className="mt-2 p-2 border-l-4 border-blue-400 bg-blue-50 rounded">
+                          <p className="text-sm font-semibold">Related Article:</p>
+                          <a
+                            href={result.related_article.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline"
+                          >
+                            {result.related_article.title}
+                          </a>
+                        </div>
+                      )}
+
+                      <div className="flex gap-2 mt-2">
                         <Button className="flex-1 bg-secondary hover:bg-secondary/90">
                           Approve & Publish
                         </Button>
