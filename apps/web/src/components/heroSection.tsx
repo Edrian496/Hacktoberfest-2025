@@ -1,10 +1,10 @@
-import svgPaths from "./imports/svg-rh6umkm19p";
+import svgPaths from "../../public/imports/svg-rh6umkm19p";
 
 function Group6() {
   return (
     <div className="absolute contents left-[30px] top-0">
       <div className="absolute left-[30px] size-[257px] top-0" data-name="bangon 2">
-        <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgBangon2} />
+        <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src="./imports/logo.png" />
       </div>
       <div className="absolute h-[35.078px] left-[172.46px] top-[93.06px] w-[23.982px]">
         <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 24 36">
@@ -39,7 +39,7 @@ function Group6() {
 function Group16() {
   return (
     <div className="relative size-full">
-      <p className="absolute font-['Manrope:Bold',_sans-serif] font-bold h-[109px] leading-[28px] left-[calc(50%-328px)] text-[150px] text-blue-900 top-[108px] w-[656px] whitespace-pre-wrap">{`B    NGON`}</p>
+      <p className="absolute font-['Manrope:Bold',_sans-serif] font-bold h-[109px] leading-[28px] left-[calc(50%-375px)] text-[150px] text-blue-900 top-[108px] w-[750px] whitespace-pre-wrap">{`B   NGON`}</p>
       <Group6 />
     </div>
   );

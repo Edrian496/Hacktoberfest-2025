@@ -1,10 +1,5 @@
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import imgImageWithFallback4 from "figma:asset/298e1077e3e6dd5cdcdaf5ccc2b1dad52257e4e6.png";
-import imgImageWithFallback5 from "figma:asset/026806389db2c88fd95dcf643d4fd82d20dbcffa.png";
-import imgImageWithFallback6 from "figma:asset/dabf3f9843f9a03badc9e488a40e7ac00c64a49b.png";
-import imgImageWithFallback7 from "figma:asset/1fd6e16814d6ceb420f2fbfd943fde187865cba9.png";
-import imgImageWithFallback8 from "figma:asset/553b920601d29a8356d48ec23b444d696d115e37.png";
-import imgImageWithFallback9 from "figma:asset/53cfdf3a69ef03743054bb582390407b64e12896.png";
+
 
 interface Partner {
   id: number;
@@ -21,42 +16,42 @@ export function PartnersSection() {
       name: "Philippine Red Cross",
       description: "Leading humanitarian organization",
       designation: "NGO",
-      image: imgImageWithFallback4
+      image: "./imports/angatbuhay.jpg"
     },
     {
       id: 2,
       name: "UNICEF Philippines",
       description: "Children and family welfare",
       designation: "NGO",
-      image: imgImageWithFallback5
+      image: "./imports/angatbuhay.jpg"
     },
     {
       id: 3,
       name: "World Vision",
       description: "Global humanitarian organization",
       designation: "NGO",
-      image: imgImageWithFallback6
+      image: "./imports/angatbuhay.jpg"
     },
     {
       id: 4,
       name: "Operation Blessing",
       description: "Disaster relief and aid",
       designation: "NGO",
-      image: imgImageWithFallback7
+      image: "./imports/angatbuhay.jpg"
     },
     {
       id: 5,
       name: "Gawad Kalinga",
       description: "Community development",
       designation: "LGU",
-      image: imgImageWithFallback8
+      image: "./imports/angatbuhay.jpg"
     },
     {
       id: 6,
       name: "Habitat for Humanity",
       description: "Housing and infrastructure",
       designation: "LGU",
-      image: imgImageWithFallback9
+      image: "./imports/angatbuhay.jpg"
     }
   ];
 
@@ -94,7 +89,7 @@ export function PartnersSection() {
               {/* Logo */}
               <div className="bg-slate-50 w-20 h-20 rounded-[16px] mx-auto mb-6 overflow-hidden border-2 border-white shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)]">
                 <img 
-                  src={partner.image} 
+                  src="./imports/angatbuhay.jpg"
                   alt={partner.name}
                   className="w-full h-full object-cover p-0.5"
                 />

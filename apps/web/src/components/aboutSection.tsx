@@ -1,6 +1,4 @@
-import { ImageWithFallback } from './figma/ImageWithFallback';
-import svgPaths from "./imports/svg-3okl1n2ttv";
-import imgImageWithFallback from "figma:asset/a6a657758b1bff8aff80a441784c64b2e846d808.png";
+import svgPaths from "../../public/imports/svg-3okl1n2ttv";
 
 export function AboutSection() {
   return (
@@ -9,7 +7,7 @@ export function AboutSection() {
         {/* Header */}
         <div className="text-center mb-16">
           <h2 className="font-['Manrope:Bold',_sans-serif] font-bold text-[60px] leading-[60px] text-[#101828] mb-6">
-            About Bangon
+            ABOUT BANGON
           </h2>
           <p className="font-['Nunito:Regular',_sans-serif] font-normal text-[24px] leading-[39px] text-[#4a5565] max-w-[896px] mx-auto">
             Bridging the trust gap in disaster relief through blockchain technology and AI-powered verification.
@@ -23,7 +21,7 @@ export function AboutSection() {
             <img 
               alt="About Bangon" 
               className="w-full h-full object-cover" 
-              src={imgImageWithFallback} 
+              src="./imports/about.png" 
             />
           </div>
 

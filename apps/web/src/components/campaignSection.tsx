@@ -1,7 +1,3 @@
-import imgImageWithFallback1 from "figma:asset/7cce6516c2fab280957c825fa5af57d2e207cc92.png";
-import imgImageWithFallback2 from "figma:asset/441f477881dab9d2c267e61414c4eed1408acebe.png";
-import imgImageWithFallback3 from "figma:asset/be165805826f2f64d9286c10446a4c91f7afb0fd.png";
-
 interface Campaign {
   id: number;
   title: string;
@@ -21,7 +17,7 @@ export function CampaignsSection() {
       location: "📍 Northern Luzon",
       status: "Urgent",
       amountRaised: "₱1,875,000",
-      image: imgImageWithFallback1
+      image: "./imports/Disaster1.png"
     },
     {
       id: 2,
@@ -30,7 +26,7 @@ export function CampaignsSection() {
       location: "📍 Southern Philippines",
       status: "Active",
       amountRaised: "₱980,000",
-      image: imgImageWithFallback2
+      image: "./imports/Disaster2.png"
     },
     {
       id: 3,
@@ -39,7 +35,7 @@ export function CampaignsSection() {
       location: "📍 Metro Manila",
       status: "Active",
       amountRaised: "₱520,000",
-      image: imgImageWithFallback3
+      image: "./imports/Disaster3.png"
     }
   ];
 
@@ -62,7 +58,7 @@ export function CampaignsSection() {
         {/* Header */}
         <div className="text-center mb-16">
           <h2 className="font-['Manrope:Bold',_sans-serif] font-bold text-[60px] leading-[60px] text-[#101828] mb-6">
-            Active Campaigns
+            ACTIVE CAMPAIGNS
           </h2>
           <p className="font-['Nunito:Regular',_sans-serif] font-normal text-[24px] leading-[39px] text-[#4a5565]">
             Support ongoing relief efforts with complete blockchain transparency.

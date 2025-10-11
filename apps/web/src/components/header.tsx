@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import svgPaths from "./imports/svg-3okl1n2ttv";
-import imgBangon2 from "figma:asset/dcdd7aafc46ccc47051f47da4f0d1d394701e2ab.png";
+import svgPaths from "../../public/imports/svg-3okl1n2ttv";
 
 export function Header() {
   const [activeSection, setActiveSection] = useState('home');
@@ -53,7 +52,7 @@ export function Header() {
                 <img 
                   alt="Bangon Logo" 
                   className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" 
-                  src={imgBangon2} 
+                  src="./imports/emblem.png" 
                 />
               </div>
               <div className="absolute h-[2.206px] left-[11.62px] top-[4.31px] w-[1.509px]">
