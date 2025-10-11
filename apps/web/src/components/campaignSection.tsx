@@ -53,8 +53,8 @@ export function CampaignsSection() {
   };
 
   return (
-    <section id="campaigns" className="bg-gray-50 py-52">
-      <div className="max-w-7xl mx-auto px-8">
+    <section id="campaigns" className="bg-[rgba(0,167,238,0.03)] py-52">
+      <div className=" max-w-7xl mx-auto px-8">
         {/* Header */}
         <div className="text-center mb-16">
           <h2 className="font-['Manrope:Bold',_sans-serif] font-bold text-[60px] leading-[60px] text-[#101828] mb-6">

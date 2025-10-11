@@ -59,7 +59,7 @@ export function PartnersSection() {
     <section id="partners" className="bg-slate-50 py-20 relative overflow-hidden">
 
       <div className="max-w-7xl mx-auto px-8 relative z-10">
-        {/* Header */}
+        
         <div className="text-center mb-8">
           <h2 className="font-['Manrope:Bold',_sans-serif] font-bold text-[60px] leading-[60px] text-gray-900 mb-6">
             TRUSTED PARTNERS
@@ -69,18 +69,15 @@ export function PartnersSection() {
           </p>
         </div>
 
-        {/* Partners Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-6">
           {partners.map((partner) => (
             <div key={partner.id} className="bg-[rgba(0,167,238,0.05)] border-2 border-[#00a7ee] rounded-[24px] p-8 relative hover:shadow-lg transition-shadow">
-              {/* Designation Badge - All Yellow */}
               <div className="absolute top-4 right-4 bg-[#FACC15] px-3 py-1 rounded-full">
                 <span className="text-[#111827] text-[14px] font-bold capitalize">
                   {partner.designation}
                 </span>
               </div>
 
-              {/* Logo */}
               <div className="bg-slate-50 w-20 h-20 rounded-[16px] mx-auto mb-4 overflow-hidden border-2 border-white shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)]">
                 <img 
                   src="./imports/angatbuhay.jpg"
@@ -89,7 +86,6 @@ export function PartnersSection() {
                 />
               </div>
 
-              {/* Content */}
               <div className="text-center">
                 <h3 className="font-['Manrope:Bold',_sans-serif] font-bold text-[20px] leading-[28px] text-gray-900 mb-2">
                   {partner.name}
@@ -102,7 +98,6 @@ export function PartnersSection() {
           ))}
         </div>
 
-        {/* Stats Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           <div className="bg-[rgba(255,255,255,0.6)] border border-[rgba(0,167,238,0.2)] rounded-[16px] p-6 text-center">
             <div className="font-['Manrope:Bold',_sans-serif] font-bold text-[36px] leading-[40px] text-[#00a7ee] mb-2">
@@ -132,7 +127,6 @@ export function PartnersSection() {
           </div>
         </div>
 
-        {/* CTA Buttons */}
         <div className="text-center">
           <div className="inline-flex flex-col sm:flex-row gap-4">
             <button className="bg-[#00a7ee] hover:bg-[#0096d1] text-white px-8 py-3 rounded-[16px] font-bold text-[14px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] transition-colors">

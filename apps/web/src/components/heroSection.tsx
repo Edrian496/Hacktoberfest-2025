@@ -72,7 +72,7 @@ export function HeroSection() {
   };
 
   return (
-<section className="bg-white min-h-[900px] relative flex items-center justify-center overflow-hidden">
+<section className="bg-[rgba(0,167,238,0.05)] min-h-[900px] relative flex items-center justify-center overflow-hidden">
   <AirplanePlaceholder src="./imports/airplane4.png" alt="Airplane 1" className="top-[600px] left-[20%] w-[140px] lg:w-[170px] transition-transform duration-300 hover: hover:translate-x-5 hover:-translate-y-5" />
   <AirplanePlaceholder src="./imports/airplane5.png" alt="Airplane 3" className="bottom-[240px] left-[8%] w-[180px] lg:w-[250px] transition-transform duration-300 hover: hover:translate-x-5 hover:-translate-y-5" />
   <AirplanePlaceholder src="./imports/airplane2.png" alt="Airplane 4" className="top-[400px] right-[8%] w-[180px] lg:w-[250px] transition-transform duration-300 hover: hover:-translate-x-5 hover:-translate-y-5" />
