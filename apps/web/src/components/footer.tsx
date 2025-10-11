@@ -1,3 +1,7 @@
+"use client";
+
+import React from 'react'; 
+
 function Group8() {
   return (
     <div className="relative ml-2 mt-2">
@@ -13,10 +17,27 @@ function Group8() {
 }
 
 function BrandSection() {
+  const HEADER_HEIGHT = 80; 
+
+  const scrollToSection = (sectionId: string) => {
+    const target = document.getElementById(sectionId);
+    if (target) {
+      window.scrollTo({
+        top: target.offsetTop - HEADER_HEIGHT,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const handleBrandLogoClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    scrollToSection("home");
+  };
+
   return (
     <div className="flex flex-col items-center lg:items-start">
       <div className="relative mb-4">
-        <div className="relative h-[30px] w-[184px]">
+        <div className="relative h-[30px] w-[184px] cursor-pointer" onClick={handleBrandLogoClick}>
           <p className="absolute font-['Manrope:Bold',_sans-serif] font-bold h-[30px] leading-[28px] left-0 text-[40px] text-gray-100 top-0 w-[184px] whitespace-pre-wrap">
             {`B   NGON`}
           </p>
@@ -28,13 +49,17 @@ function BrandSection() {
 
       <p className="font-['Nunito:Regular',_sans-serif] font-normal leading-[24px] text-[#d1d5dc] text-[16px] max-w-[435px] mb-8 text-center lg:text-left">
         {" "}
-        {/* Added text-center for mobile */}
         Blockchain-powered donation platform ensuring transparency and
         accountability in disaster relief efforts.
       </p>
 
       <div className="flex items-center justify-center lg:justify-start">
-        <div className="w-4 h-4 mr-3 flex-shrink-0"></div>
+        <div className="w-0 h-4 mr-1 flex-shrink-0"></div>
+        <img
+          alt="email"
+          className="w-4 h-4 mr-3 flex-shrink-0"
+          src="./imports/email.png"
+        />
         <p className="font-['Nunito:Regular',_sans-serif] font-normal leading-[20px] text-[#d1d5dc] text-[14px]">
           contact@bangon.org
         </p>
@@ -44,18 +69,33 @@ function BrandSection() {
 }
 
 function QuickLinks() {
+  const HEADER_HEIGHT = 80; 
+
+  const scrollToSection = (sectionId: string) => {
+    const target = document.getElementById(sectionId);
+    if (target) {
+      window.scrollTo({
+        top: target.offsetTop - HEADER_HEIGHT,
+        behavior: "smooth",
+      });
+    }
+  };
+
   const links = [
-    { name: "Home", href: "#home" },
-    { name: "About", href: "#about" },
-    { name: "Fact Check", href: "#fact-check" },
-    { name: "Campaigns", href: "#campaigns" },
-    { name: "Partners", href: "#partners" },
+    { name: "Home", href: "#home", sectionId: "home" }, 
+    { name: "About", href: "#about", sectionId: "about" }, 
+    { name: "Campaigns", href: "#campaigns", sectionId: "campaigns" },
+    { name: "Partners", href: "#partners", sectionId: "partners" }, 
   ];
+
+  const handleQuickLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
+    e.preventDefault(); 
+    scrollToSection(sectionId);
+  };
 
   return (
     <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
       {" "}
-      {/* Added items-center and text-center */}
       <h3 className="font-['Manrope:SemiBold',_sans-serif] font-semibold leading-[27px] text-[18px] text-white mb-6">
         Quick Links
       </h3>
@@ -64,7 +104,8 @@ function QuickLinks() {
           <li key={index}>
             <a
               href={link.href}
-              className="font-['Nunito:Regular',_sans-serif] font-normal leading-[24px] text-[#d1d5dc] text-[16px] hover:text-white transition-colors"
+              onClick={(e) => handleQuickLinkClick(e, link.sectionId)} 
+              className="font-['Nunito:Regular',_sans-serif] font-normal leading-[24px] text-[#d1d5dc] text-[16px] hover:text-white transition-colors cursor-pointer" // Added cursor-pointer
             >
               {link.name}
             </a>
@@ -84,7 +125,6 @@ function ContactInfo() {
   return (
     <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
       {" "}
-      {/* Added items-center and text-center */}
       <h3 className="font-['Manrope:SemiBold',_sans-serif] font-semibold leading-[24px] text-[16px] text-white mb-4">
         Contact
       </h3>

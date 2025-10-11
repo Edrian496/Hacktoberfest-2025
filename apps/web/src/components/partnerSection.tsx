@@ -57,12 +57,6 @@ export function PartnersSection() {
 
   return (
     <section id="partners" className="bg-slate-50 py-20 relative overflow-hidden">
-      {/* Background decorative circles */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-10 left-10 w-32 h-32 rounded-full border border-[rgba(0,167,238,0.2)]" />
-        <div className="absolute bottom-20 right-20 w-24 h-24 rounded-full border border-[rgba(250,204,21,0.3)]" />
-        <div className="absolute top-1/3 right-10 w-16 h-16 rounded-full border border-[rgba(30,58,138,0.2)]" />
-      </div>
 
       <div className="max-w-7xl mx-auto px-8 relative z-10">
         {/* Header */}
