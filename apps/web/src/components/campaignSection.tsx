@@ -53,7 +53,7 @@ export function CampaignsSection() {
   };
 
   return (
-    <section id="campaigns" className="bg-gray-50 py-20">
+    <section id="campaigns" className="bg-gray-50 py-52">
       <div className="max-w-7xl mx-auto px-8">
         {/* Header */}
         <div className="text-center mb-16">

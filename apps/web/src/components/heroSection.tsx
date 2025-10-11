@@ -47,11 +47,11 @@ function Group16() {
 
 export function HeroSection() {
   return (
-    <section className="bg-white min-h-[700px] relative flex items-center justify-center">
+    <section className="bg-white min-h-[900px] relative flex items-center justify-center">
       <div className="max-w-7xl mx-auto px-8 text-center">
         {/* Logo and Main Title */}
-        <div className="relative mb-4 flex justify-center">
-          <div className="relative w-[656px] h-[300px]">
+        <div className="relative mb-0 flex justify-center">
+          <div className="relative w-[656px] h-[230px]">
             <Group16 />
           </div>
         </div>

@@ -17,6 +17,9 @@ const nunito = Nunito({
 
 export const metadata: Metadata = {
   title: "Bangon",
+  icons: {
+    icon: "./imports/logo.png", 
+  },
 };
 
 export default function RootLayout({

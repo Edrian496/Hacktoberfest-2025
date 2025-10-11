@@ -66,7 +66,7 @@ export function PartnersSection() {
 
       <div className="max-w-7xl mx-auto px-8 relative z-10">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-8">
           <h2 className="font-['Manrope:Bold',_sans-serif] font-bold text-[60px] leading-[60px] text-gray-900 mb-6">
             TRUSTED PARTNERS
           </h2>
@@ -76,7 +76,7 @@ export function PartnersSection() {
         </div>
 
         {/* Partners Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-6">
           {partners.map((partner) => (
             <div key={partner.id} className="bg-[rgba(0,167,238,0.05)] border-2 border-[#00a7ee] rounded-[24px] p-8 relative hover:shadow-lg transition-shadow">
               {/* Designation Badge - All Yellow */}
@@ -87,7 +87,7 @@ export function PartnersSection() {
               </div>
 
               {/* Logo */}
-              <div className="bg-slate-50 w-20 h-20 rounded-[16px] mx-auto mb-6 overflow-hidden border-2 border-white shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)]">
+              <div className="bg-slate-50 w-20 h-20 rounded-[16px] mx-auto mb-4 overflow-hidden border-2 border-white shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)]">
                 <img 
                   src="./imports/angatbuhay.jpg"
                   alt={partner.name}
@@ -109,7 +109,7 @@ export function PartnersSection() {
         </div>
 
         {/* Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           <div className="bg-[rgba(255,255,255,0.6)] border border-[rgba(0,167,238,0.2)] rounded-[16px] p-6 text-center">
             <div className="font-['Manrope:Bold',_sans-serif] font-bold text-[36px] leading-[40px] text-[#00a7ee] mb-2">
               50+
