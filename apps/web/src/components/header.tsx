@@ -6,6 +6,7 @@ import svgPaths from "../../public/imports/svg-3okl1n2ttv";
 
 export function Header() {
   const [activeSection, setActiveSection] = useState("home");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const HEADER_HEIGHT = 80;
   const router = useRouter();
 
@@ -55,6 +56,15 @@ export function Header() {
     return `${baseClasses} text-[#364153] border-b-[3px] border-transparent hover:border-primary`;
   };
 
+  const getMobileLinkClasses = (section: string) => {
+    const baseClasses =
+      "font-['Manrope:Medium',_sans-serif] font-regular text-[16px] tracking-wide transition-all duration-300 hover:text-primary block py-3";
+    if (isActive(section)) {
+      return `${baseClasses} text-primary border-l-[3px] border-primary pl-4`;
+    }
+    return `${baseClasses} text-[#364153] border-l-[3px] border-transparent hover:border-primary pl-4`;
+  };
+
   const handleScroll = (
     e: React.MouseEvent<HTMLAnchorElement>,
     sectionId: string
@@ -67,32 +77,44 @@ export function Header() {
         behavior: "smooth",
       });
       setActiveSection(sectionId);
+      setIsMenuOpen(false); // Close mobile menu after clicking
     }
   };
 
   const handleLogoClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    handleScroll(e, "home"); // Scroll to the 'home' section
+    e.preventDefault();
+    const target = document.getElementById("home");
+    if (target) {
+      window.scrollTo({
+        top: target.offsetTop - HEADER_HEIGHT,
+        behavior: "smooth",
+      });
+      setActiveSection("home");
+      setIsMenuOpen(false);
+    }
   };
 
   const handleLoginClick = () => {
     router.push('/login'); 
+    setIsMenuOpen(false);
   };
 
   return (
     <header className="sticky top-0 z-50 bg-white border-2 border-gray-300 h-20">
-      <div className="max-w-7xl mx-auto px-8 h-full">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
         <div className="flex items-center justify-between h-full">
 
+          {/* Logo */}
           <div className="flex items-center">
             <div className="relative cursor-pointer" onClick={handleLogoClick}>
-              <div className="size-16" data-name="bangon 2">
+              <div className="size-12 sm:size-16" data-name="bangon 2">
                 <img
                   alt="Bangon Logo"
                   className="absolute inset-2 max-w-none object-50%-50% object-cover pointer-events-none size-full"
                   src="./imports/emblem.png"
                 />
               </div>
-              <div className="absolute h-[2.206px] left-[11.62px] top-[4.31px] w-[1.509px]">
+              <div className="absolute h-[2.206px] left-[11.62px] top-[4.31px] w-[1.509px] hidden sm:block">
                 <svg
                   className="block size-full"
                   fill="none"
@@ -120,7 +142,7 @@ export function Header() {
                 </svg>
               </div>
               <div
-                className="absolute flex h-[calc(1px*((var(--transform-inner-width)*0.007430866360664368)+(var(--transform-inner-height)*0.999972403049469)))] items-center justify-center left-[6.58px] top-[8.46px] w-[calc(1px*((var(--transform-inner-height)*0.007430866360664368)+(var(--transform-inner-width)*0.999972403049469)))]"
+                className="absolute hidden sm:flex h-[calc(1px*((var(--transform-inner-width)*0.007430866360664368)+(var(--transform-inner-height)*0.999972403049469)))] items-center justify-center left-[6.58px] top-[8.46px] w-[calc(1px*((var(--transform-inner-height)*0.007430866360664368)+(var(--transform-inner-width)*0.999972403049469)))]"
                 style={
                   {
                     "--transform-inner-width": "10.0625",
@@ -161,7 +183,8 @@ export function Header() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-8">
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center space-x-8">
             <nav className="flex items-center space-x-10">
               {["home", "about", "partners", "campaigns"].map((section) => (
                 <a
@@ -190,6 +213,48 @@ export function Header() {
               </div>
             </button>
           </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="lg:hidden flex flex-col justify-center items-center w-10 h-10 space-y-1.5"
+            aria-label="Toggle menu"
+          >
+            <span className={`block w-6 h-0.5 bg-gray-800 transition-all duration-300 ${isMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
+            <span className={`block w-6 h-0.5 bg-gray-800 transition-all duration-300 ${isMenuOpen ? 'opacity-0' : ''}`}></span>
+            <span className={`block w-6 h-0.5 bg-gray-800 transition-all duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
+          </button>
+        </div>
+
+        {/* Mobile Navigation Menu */}
+        <div className={`lg:hidden absolute left-0 right-0 top-20 bg-white border-b-2 border-gray-300 transition-all duration-300 overflow-hidden ${isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+          <nav className="flex flex-col py-4 px-4">
+            {["home", "about", "partners", "campaigns"].map((section) => (
+              <a
+                key={section}
+                href={`#${section}`}
+                onClick={(e) => handleScroll(e, section)}
+                className={getMobileLinkClasses(section)}
+              >
+                {section === "campaigns"
+                  ? "Active Campaigns"
+                  : section.charAt(0).toUpperCase() + section.slice(1)}
+              </a>
+            ))}
+            
+            <button
+              onClick={handleLoginClick}
+              className="mt-4 h-10 rounded-[10px] border border-primary transition-colors duration-300
+                         hover:bg-primary cursor-pointer group w-full" 
+            >
+              <div className="h-full px-[18px] py-[6px] flex items-center justify-center">
+                <span className="font-['Nunito:Regular',_sans-serif] font-normal text-[16px] text-primary
+                                   group-hover:text-white">
+                  Login
+                </span>
+              </div>
+            </button>
+          </nav>
         </div>
       </div>
     </header>

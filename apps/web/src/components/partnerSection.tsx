@@ -56,7 +56,7 @@ export function PartnersSection() {
   ];
 
   return (
-    <section id="partners" className="bg-slate-50 py-20 relative overflow-hidden">
+    <section id="partners" className="min-h-[600px] bg-slate-50 py-20 relative overflow-hidden">
 
       <div className="max-w-7xl mx-auto px-8 relative z-10">
         {/* Header */}
@@ -124,7 +124,7 @@ export function PartnersSection() {
           
           <div className="bg-[rgba(255,255,255,0.6)] border border-[rgba(250,204,21,0.2)] rounded-[16px] p-6 text-center">
             <div className="font-['Manrope:Bold',_sans-serif] font-bold text-[36px] leading-[40px] text-yellow-400 mb-2">
-              $2M+
+              ₱2M+
             </div>
             <p className="font-['Nunito:Regular',_sans-serif] font-normal text-[16px] leading-[24px] text-[rgba(17,24,39,0.7)]">
               Distributed Together

@@ -53,9 +53,9 @@ export function CampaignsSection() {
   };
 
   return (
-    <section id="campaigns" className="bg-gray-50 py-52">
+    <section id="campaigns" className="bg-[rgba(0,167,238,0.05)] py-35">
       <div className="max-w-7xl mx-auto px-8">
-        {/* Header */}
+        
         <div className="text-center mb-16">
           <h2 className="font-['Manrope:Bold',_sans-serif] font-bold text-[60px] leading-[60px] text-[#101828] mb-6">
             ACTIVE CAMPAIGNS
@@ -65,11 +65,11 @@ export function CampaignsSection() {
           </p>
         </div>
 
-        {/* Campaigns Grid */}
+        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {campaigns.map((campaign) => (
             <div key={campaign.id} className="bg-white rounded-[16px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] overflow-hidden">
-              {/* Image with Status Badge */}
+              
               <div className="relative h-48">
                 <img 
                   src={campaign.image} 
@@ -79,7 +79,7 @@ export function CampaignsSection() {
 
               </div>
 
-              {/* Content */}
+             
               <div className="p-6">
                 <h3 className="font-['Manrope:Bold',_sans-serif] font-bold text-[20px] leading-[28px] text-[#101828] mb-4">
                   {campaign.title}
@@ -89,7 +89,7 @@ export function CampaignsSection() {
                   {campaign.description}
                 </p>
 
-                {/* Location and Status */}
+                
                 <div className="flex justify-between items-center mb-6">
                   <span className="font-['Arimo:Regular',_sans-serif] font-normal text-[12px] leading-[16px] text-[#6a7282]">
                     {campaign.location}
@@ -99,7 +99,7 @@ export function CampaignsSection() {
                   </span>
                 </div>
 
-                {/* Amount Raised */}
+                
                 <div className="mb-6">
                   <div className="font-['Manrope:Bold',_sans-serif] font-bold text-[24px] leading-[32px] text-[#00a7ee] mb-1">
                     {campaign.amountRaised}
@@ -109,7 +109,7 @@ export function CampaignsSection() {
                   </div>
                 </div>
 
-                {/* Support Button */}
+                
                 <button className="w-full bg-[#00a7ee] text-white text-[14px] font-bold py-2 px-4 rounded-[16px] hover:bg-[#0096d1] transition-colors">
                   Support Campaign
                 </button>
