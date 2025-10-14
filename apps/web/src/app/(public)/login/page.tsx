@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Mail, Lock, User } from "lucide-react";
-import { supabase } from "@/lib/supabaseClient"; // <-- your supabase client
+import { supabase } from "@/lib/supabaseClient";
 
 export default function LoginRegisterPage() {
   const router = useRouter();
@@ -56,8 +56,8 @@ export default function LoginRegisterPage() {
       email: registerEmail,
       password: registerPassword,
       options: {
-        data: { full_name: registerName }, // optional metadata
-        emailRedirectTo: `${window.location.origin}/login`, // after confirm, redirect to login
+        data: { full_name: registerName },
+        emailRedirectTo: `${window.location.origin}/login`,
       },
     });
 
@@ -68,8 +68,6 @@ export default function LoginRegisterPage() {
       return;
     }
 
-    // At this point, Supabase sent confirmation email
-    // The user must confirm before being able to log in
     setError(null);
     alert(
       "Registration successful! Please check your email to confirm your account before logging in."
@@ -84,14 +82,13 @@ export default function LoginRegisterPage() {
     if (error) {
       setError(error.message);
     }
-    // After success, Supabase will redirect back with session
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle>Welcome to QuakeAid</CardTitle>
+          <CardTitle>Welcome to BANGON</CardTitle>
           <CardDescription>
             Login or create an account to start helping
           </CardDescription>
@@ -99,8 +96,18 @@ export default function LoginRegisterPage() {
         <CardContent>
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="register">Register</TabsTrigger>
+              <TabsTrigger 
+                value="login"
+                className="data-[state=active]:bg-[#FACC15]/60"
+              >
+                Login
+              </TabsTrigger>
+              <TabsTrigger 
+                value="register"
+                className="data-[state=active]:bg-[#FACC15]/60"
+              >
+                Register
+              </TabsTrigger>
             </TabsList>
 
             {/* Login */}
