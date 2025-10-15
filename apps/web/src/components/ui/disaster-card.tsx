@@ -75,7 +75,7 @@ export function DisasterCard({
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Progress</span>
               <span>
-                ${fundsRaised?.toLocaleString()} / ${fundGoal.toLocaleString()}
+                ₱{fundsRaised?.toLocaleString()} / ₱{fundGoal.toLocaleString()}
               </span>
             </div>
             <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
