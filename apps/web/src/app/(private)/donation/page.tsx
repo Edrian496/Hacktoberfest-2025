@@ -86,7 +86,7 @@ export default function DonationsPage() {
       <main className="flex-1 p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
-            <h1 className="mb-2">My Donations</h1>
+            <h1 className="mb-2 font-bold">My Donations</h1>
             <p className="text-muted-foreground">
               View your donation history and track them on the blockchain
             </p>

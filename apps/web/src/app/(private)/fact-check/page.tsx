@@ -100,78 +100,72 @@ export default function FactCheckAdmin({
   ]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  
-  // Validate before sending
-  if (inputType === "text") {
-    if (!textInput || textInput.trim() === "") {
-      alert("Please enter text to fact-check");
-      return;
-    }
-  } else {
-    if (!urlInput || urlInput.trim() === "") {
-      alert("Please enter a URL to fact-check");
-      return;
-    }
-  }
-  
-  setIsLoading(true);
-  
-  try {
-    const payload = inputType === "text" 
-      ? { text: textInput.trim() }
-      : { url: urlInput.trim() };
-
-
-    //Debug payload
-    console.log("Sending payload:", payload); 
+    e.preventDefault();
     
-    const response = await axios.post("http://localhost:8000/fact-check", payload);
-    
-    setResult({
-      verdict: response.data.verdict,
-      confidence: response.data.confidence,
-      explanation: response.data.explanation,
-      related_article: response.data.related_article,
-    });
-    
-} catch (error) {
-  console.error("Full error:", error);
-  if (axios.isAxiosError(error)) {
-    const detail = error.response?.data?.detail;
-    console.error("Response data:", error.response?.data);
-    console.error("Detail array:", detail);
-    
-    // Log each error in detail
-    if (Array.isArray(detail)) {
-      detail.forEach((err, index) => {
-        console.error(`Error ${index}:`, {
-          location: err.loc,
-          message: err.msg,
-          type: err.type,
-          input: err.input
-        });
-      });
-    }
-      
-      // Format FastAPI validation errors
-      const errorDetail = error.response?.data?.detail;
-      if (Array.isArray(errorDetail)) {
-        const errorMessages = errorDetail.map((err: any) => 
-          `Field: ${err.loc?.join('.')}, Error: ${err.msg}, Type: ${err.type}`
-        ).join('\n');
-        alert(`Validation Error:\n\n${errorMessages}`);
-      } else {
-        alert(`Error: ${JSON.stringify(error.response?.data)}`);
+    if (inputType === "text") {
+      if (!textInput || textInput.trim() === "") {
+        alert("Please enter text to fact-check");
+        return;
       }
     } else {
-      alert("Network error - make sure backend is running on port 8000");
+      if (!urlInput || urlInput.trim() === "") {
+        alert("Please enter a URL to fact-check");
+        return;
+      }
     }
-  } finally {
-    setIsLoading(false);
-  }
-};
+    
+    setIsLoading(true);
+    
+    try {
+      const payload = inputType === "text" 
+        ? { text: textInput.trim() }
+        : { url: urlInput.trim() };
 
+      console.log("Sending payload:", payload); 
+      
+      const response = await axios.post("http://localhost:8000/fact-check", payload);
+      
+      setResult({
+        verdict: response.data.verdict,
+        confidence: response.data.confidence,
+        explanation: response.data.explanation,
+        related_article: response.data.related_article,
+      });
+      
+    } catch (error) {
+      console.error("Full error:", error);
+      if (axios.isAxiosError(error)) {
+        const detail = error.response?.data?.detail;
+        console.error("Response data:", error.response?.data);
+        console.error("Detail array:", detail);
+        
+        if (Array.isArray(detail)) {
+          detail.forEach((err, index) => {
+            console.error(`Error ${index}:`, {
+              location: err.loc,
+              message: err.msg,
+              type: err.type,
+              input: err.input
+            });
+          });
+        }
+          
+        const errorDetail = error.response?.data?.detail;
+        if (Array.isArray(errorDetail)) {
+          const errorMessages = errorDetail.map((err: any) => 
+            `Field: ${err.loc?.join('.')}, Error: ${err.msg}, Type: ${err.type}`
+          ).join('\n');
+          alert(`Validation Error:\n\n${errorMessages}`);
+        } else {
+          alert(`Error: ${JSON.stringify(error.response?.data)}`);
+        }
+      } else {
+        alert("Network error - make sure backend is running on port 8000");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleReview = (submission: any) => {
     setSelectedSubmission(submission);
@@ -208,21 +202,17 @@ export default function FactCheckAdmin({
 
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Main content */}
       <main className="flex-1 p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
-          {/* Page header */}
           <div className="mb-8">
-            <h1 className="mb-2">Fact-Check Management</h1>
+            <h1 className="mb-2 font-bold">Fact-Check Management</h1>
             <p className="text-muted-foreground">
               Review and verify disaster-related information submissions
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left section */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Verify new content */}
               <Card>
                 <CardHeader>
                   <CardTitle>Verify New Content</CardTitle>
@@ -236,9 +226,19 @@ export default function FactCheckAdmin({
                       value={inputType}
                       onValueChange={(v) => setInputType(v as "text" | "url")}
                     >
-                      <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="text">Text Input</TabsTrigger>
-                        <TabsTrigger value="url">URL</TabsTrigger>
+                      <TabsList className="grid w-full grid-cols-2 mb-6">
+                        <TabsTrigger 
+                          value="text"
+                          className="data-[state=active]:bg-[#FACC15]/60 data-[state=active]"
+                        >
+                          Text Input
+                        </TabsTrigger>
+                        <TabsTrigger 
+                          value="url"
+                          className="data-[state=active]:bg-[#FACC15]/60 data-[state=active]"
+                        >
+                          URL
+                        </TabsTrigger>
                       </TabsList>
 
                       <TabsContent value="text" className="space-y-4">
@@ -255,7 +255,7 @@ export default function FactCheckAdmin({
                         />
                       </TabsContent>
 
-                      <TabsContent value="url" className="space-y-4">
+                      <TabsContent value="url" className="space-y-4 mb-7" >
                         <Label htmlFor="admin-url-input">Article URL</Label>
                         <Input
                           id="admin-url-input"
@@ -325,7 +325,6 @@ export default function FactCheckAdmin({
                 </CardContent>
               </Card>
 
-              {/* Submissions list */}
               <Card>
                 <CardHeader>
                   <CardTitle>All Submissions</CardTitle>
@@ -387,7 +386,6 @@ export default function FactCheckAdmin({
               </Card>
             </div>
 
-            {/* Right section (stats + quick actions) */}
             <div className="space-y-6">
               <Card>
                 <CardHeader>
@@ -451,7 +449,6 @@ export default function FactCheckAdmin({
         </div>
       </main>
 
-      {/* Review dialog */}
       <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>

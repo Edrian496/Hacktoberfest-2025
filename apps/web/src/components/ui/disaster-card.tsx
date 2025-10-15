@@ -37,44 +37,46 @@ export function DisasterCard({
   const progress = fundGoal && fundsRaised ? (fundsRaised / fundGoal) * 100 : 0;
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
-      {/* Header */}
-      <CardHeader>
+    <Card className="hover:shadow-lg transition-shadow flex flex-col h-full">
+      {/* Header - Fixed height area */}
+      <CardHeader className="pb-3">
         <div className="flex justify-between items-start gap-2">
-          <CardTitle className="line-clamp-2 text-base font-semibold">
+          <CardTitle className="line-clamp-2 text-base sm:text-lg font-semibold min-h-[3rem] flex items-start">
             {title}
           </CardTitle>
           <Badge
             variant={status === "active" ? "default" : "secondary"}
-            className={
+            className={`shrink-0 ${
               status === "active"
                 ? "bg-green-600 text-white"
                 : "bg-gray-300 text-gray-700"
-            }
+            }`}
           >
             {status === "active" ? "Active" : "Completed"}
           </Badge>
         </div>
       </CardHeader>
 
-      {/* Content */}
-      <CardContent className="space-y-3">
+      {/* Content - Flexible growing area */}
+      <CardContent className="space-y-3 flex-grow pb-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <MapPin className="w-4 h-4 shrink-0" />
-          <span>{location}</span>
+          <span className="truncate">{location}</span>
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Calendar className="w-4 h-4 shrink-0" />
-          <span>{date}</span>
+          <span className="truncate">{date}</span>
         </div>
-        <p className="text-sm line-clamp-3">{description}</p>
+        <p className="text-sm text-gray-700 line-clamp-3 min-h-[3.75rem]">
+          {description}
+        </p>
 
-        {/* Progress bar */}
+        {/* Progress bar - Consistent spacing */}
         {fundGoal && (
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Progress</span>
-              <span>
+          <div className="space-y-2 pt-2">
+            <div className="flex justify-between text-xs sm:text-sm gap-2">
+              <span className="text-muted-foreground shrink-0">Progress</span>
+              <span className="text-right font-medium truncate">
                 ₱{fundsRaised?.toLocaleString()} / ₱{fundGoal.toLocaleString()}
               </span>
             </div>
@@ -84,18 +86,21 @@ export function DisasterCard({
                 style={{ width: `${Math.min(progress, 100)}%` }}
               />
             </div>
+            <div className="text-xs text-right text-muted-foreground">
+              {Math.min(progress, 100).toFixed(0)}% funded
+            </div>
           </div>
         )}
       </CardContent>
 
-      {/* Footer */}
-      <CardFooter>
+      {/* Footer - Fixed at bottom */}
+      <CardFooter className="pt-0 mt-auto">
         <Button
           onClick={() => onDonate(id)}
-          className="w-full bg-primary hover:bg-primary/90"
+          className="w-full bg-primary hover:bg-primary/90 h-10 sm:h-11"
           disabled={status === "completed"}
         >
-          {status === "completed" ? "Campaign Closed" : "Donate Now"}
+          {status === "completed" ? "Campaign Closed" : "Donate"}
         </Button>
       </CardFooter>
     </Card>
