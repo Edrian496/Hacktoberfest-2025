@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useUser } from "@/lib/useUser";
 import { Navigation } from "@/components/ui/navigation";
-import { Sidebar } from "@/components/ui/sidebar";
+import { Footer } from '../../components/ui/footer_user';
 
 export default function PrivateLayout({
   children,
@@ -13,6 +13,7 @@ export default function PrivateLayout({
 }) {
   const { user, loading } = useUser();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -20,30 +21,45 @@ export default function PrivateLayout({
     }
   }, [user, loading, router]);
 
+  useEffect(() => {
+    if (user && (pathname === "/" || pathname === "/home")) {
+      router.replace("/dashboard");
+    }
+  }, [user, pathname, router]);
+
   if (loading || !user) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        Loading...
+      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+        <div className="flex flex-col items-center justify-center">
+          
+          <div className="relative w-40 h-40">
+            <img
+              src="./imports/emblem.png"
+              alt="Bangon Logo"
+              className="w-full h-full object-contain animate-pulse"
+            />
+          </div>
+
+          <div className="flex gap-2 mt-3">
+            <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+            <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+            <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+          </div>
+
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Top navigation */}
       <Navigation />
 
-      {/* Sidebar + Content */}
       <div className="flex flex-1">
-        <Sidebar
-          isAdmin={user?.role === "admin"}
-          currentPage={""}
-          onNavigate={function (page: string, disasterId?: string): void {
-            throw new Error("Function not implemented.");
-          }}
-        />
         <main className="flex-1 p-6">{children}</main>
       </div>
+
+      <Footer />
     </div>
   );
 }

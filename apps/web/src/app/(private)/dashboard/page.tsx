@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Sidebar } from "@/components/ui/sidebar";
 import { DisasterCard } from "@/components/ui/disaster-card";
 import { ReportHelpPanel } from "@/components/ui/report-help-panel";
 
@@ -93,7 +92,7 @@ export default function DashboardPage() {
       <main className="flex-1 p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
-            <h1 className="mb-2">Active Disaster Campaigns</h1>
+            <h1 className="mb-2 font-bold">Active Disaster Campaigns</h1>
             <p className="text-muted-foreground">
               Choose a disaster to support with your donation
             </p>

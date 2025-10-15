@@ -1,18 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -20,12 +13,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AlertCircle, Phone } from "lucide-react";
+import { AlertCircle, Phone, ArrowLeft } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { supabase } from "@/lib/supabaseClient"; // <-- your client
+import { supabase } from "@/lib/supabaseClient";
 
-export function ReportHelpPanel() {
-  const [isOpen, setIsOpen] = useState(false);
+export default function HelpRequestPage() {
+  const router = useRouter();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -34,19 +27,19 @@ export function ReportHelpPanel() {
   const [description, setDescription] = useState("");
   const [contactInfo, setContactInfo] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+    if (!location || !helpType || !description) return;
+    
     setLoading(true);
 
     try {
-      // Save to Supabase (table: "help_reports")
       const { error } = await supabase.from("help_reports").insert([
         {
           location,
           help_type: helpType,
           description,
           contact_info: contactInfo || null,
-          status: "pending", // default
+          status: "pending",
         },
       ]);
 
@@ -54,14 +47,9 @@ export function ReportHelpPanel() {
 
       setSubmitted(true);
 
-      // Reset form after 3s
       setTimeout(() => {
         setSubmitted(false);
-        setIsOpen(false);
-        setLocation("");
-        setHelpType("");
-        setDescription("");
-        setContactInfo("");
+        router.push("/dashboard");
       }, 3000);
     } catch (err) {
       console.error("Error submitting help request:", err);
@@ -71,47 +59,48 @@ export function ReportHelpPanel() {
   };
 
   return (
-    <>
-      {/* Floating Button */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <Button
-          onClick={() => setIsOpen(true)}
-          size="lg"
-          className="bg-destructive hover:bg-destructive/90 shadow-lg hover:shadow-xl transition-all duration-300 animate-pulse h-14 px-6"
-        >
-          <AlertCircle className="mr-2 w-5 h-5" />
-          Request Help
-        </Button>
-      </div>
+    <div className="min-h-screen py-12 px-4">
+      <div className="max-w-2xl mx-auto">
 
-      {/* Modal Dialog */}
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-destructive" />
-              Report Urgent Assistance Needed
-            </DialogTitle>
-            <DialogDescription>
-              Submit an urgent request for help in disaster-affected areas. Our
-              team will respond as quickly as possible.
-            </DialogDescription>
-          </DialogHeader>
+        <div className="bg-white rounded-lg shadow-2xl p-8">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="bg-destructive/10 p-3 rounded-full">
+              <AlertCircle className="w-8 h-8 text-destructive" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Request Urgent Assistance
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Submit an urgent request for help in disaster-affected areas
+              </p>
+            </div>
+          </div>
+
+          <Alert className="bg-yellow-50 border-yellow-300 mt-6 mb-10">
+            <AlertCircle className="h-4 w-4 text-yellow-600" />
+            <AlertDescription className="text-sm">
+              For life-threatening emergencies, please call local emergency
+              services immediately: <strong>911</strong> or your local emergency number.
+            </AlertDescription>
+          </Alert>
 
           {submitted ? (
             <Alert className="bg-green-100 border-green-300">
               <AlertCircle className="h-5 w-5 text-green-600" />
-              <AlertTitle>Request Submitted Successfully!</AlertTitle>
-              <AlertDescription>
+              <AlertTitle className="text-lg font-semibold">
+                Request Submitted Successfully!
+              </AlertTitle>
+              <AlertDescription className="mt-2">
                 Your urgent assistance request has been received. Our response
-                team will contact you shortly.
+                team will contact you shortly. Redirecting to dashboard...
               </AlertDescription>
             </Alert>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Location */}
+
+            <div className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="location">
+                <Label htmlFor="location" className="text-base font-semibold">
                   Location <span className="text-destructive">*</span>
                 </Label>
                 <Input
@@ -120,18 +109,17 @@ export function ReportHelpPanel() {
                   placeholder="e.g., Barangay San Jose, Street Name"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  required
+                  className="h-11"
                 />
               </div>
 
-              {/* Help Type */}
               <div className="space-y-2">
-                <Label htmlFor="help-type">
+                <Label htmlFor="help-type" className="text-base font-semibold">
                   Type of Help Needed{" "}
                   <span className="text-destructive">*</span>
                 </Label>
                 <Select value={helpType} onValueChange={setHelpType}>
-                  <SelectTrigger id="help-type">
+                  <SelectTrigger id="help-type" className="h-11">
                     <SelectValue placeholder="Select type of assistance" />
                   </SelectTrigger>
                   <SelectContent>
@@ -145,9 +133,8 @@ export function ReportHelpPanel() {
                 </Select>
               </div>
 
-              {/* Description */}
               <div className="space-y-2">
-                <Label htmlFor="description">
+                <Label htmlFor="description" className="text-base font-semibold">
                   Description <span className="text-destructive">*</span>
                 </Label>
                 <Textarea
@@ -155,62 +142,53 @@ export function ReportHelpPanel() {
                   placeholder="Describe the situation and what help is needed..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  rows={4}
-                  required
+                  rows={6}
+                  className="resize-none"
                 />
               </div>
 
-              {/* Contact Info */}
               <div className="space-y-2">
-                <Label htmlFor="contact">
+                <Label htmlFor="contact" className="text-base font-semibold">
                   Contact Information{" "}
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground font-normal">
                     (Optional)
                   </span>
                 </Label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
                     id="contact"
                     type="text"
                     placeholder="Phone number or other contact details"
                     value={contactInfo}
                     onChange={(e) => setContactInfo(e.target.value)}
-                    className="pl-10"
+                    className="pl-11 h-11"
                   />
                 </div>
               </div>
 
-              {/* Alert */}
-              <Alert className="bg-yellow-50 border-yellow-300">
-                <AlertCircle className="h-4 w-4 text-yellow-600" />
-                <AlertDescription className="text-sm">
-                  For life-threatening emergencies, please call local emergency
-                  services immediately.
-                </AlertDescription>
-              </Alert>
-
-              {/* Actions */}
-              <DialogFooter className="gap-2">
+              <div className="flex gap-3 pt-4">
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => router.back()}
+                  className="flex-1 h-11"
                 >
                   Cancel
                 </Button>
                 <Button
-                  type="submit"
-                  className="bg-destructive hover:bg-destructive/90"
-                  disabled={loading}
+                  type="button"
+                  onClick={handleSubmit}
+                  className="flex-1 bg-destructive hover:bg-destructive/90 h-11"
+                  disabled={loading || !location || !helpType || !description}
                 >
                   {loading ? "Submitting..." : "Submit Urgent Request"}
                 </Button>
-              </DialogFooter>
-            </form>
+              </div>
+            </div>
           )}
-        </DialogContent>
-      </Dialog>
-    </>
+        </div>
+      </div>
+    </div>
   );
 }
