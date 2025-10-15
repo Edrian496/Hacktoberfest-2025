@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { DisasterCard } from "@/components/ui/disaster-card";
-import { ReportHelpPanel } from "@/components/ui/report-help-panel";
+
 
 export default function DashboardPage() {
   const [currentPage, setCurrentPage] = useState("dashboard");
@@ -110,8 +110,6 @@ export default function DashboardPage() {
         </div>
       </main>
 
-      {/* Floating Help Panel */}
-      <ReportHelpPanel />
     </div>
   );
 }
