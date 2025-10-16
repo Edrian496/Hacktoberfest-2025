@@ -1,13 +1,28 @@
 {
   "name": "lisk-chain",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Lisk Chain Hardhat Project",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npx hardhat test",
+    "compile": "npx hardhat compile",
+    "clean": "npx hardhat clean",
+    "node": "npx hardhat node",
+    "deploy": "npx hardhat run scripts/deploy.ts --network lisk-sepolia"
   },
-  "keywords": [],
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "lisk",
+    "hardhat"
+  ],
   "author": "",
-  "license": "ISC",
-  "type": "commonjs"
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@types/node": "^20.0.0",
+    "dotenv": "^16.3.1",
+    "hardhat": "^2.22.0",
+    "typescript": "^5.3.0",
+    "ts-node": "^10.9.0"
+  }
 }
