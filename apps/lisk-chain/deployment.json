@@ -1,0 +1,9 @@
+{
+  "network": "lisk-sepolia",
+  "contracts": {
+    "ReliefDonation": "0xD0d714aC3C8CB1fD9Eb88426467A7b110Eb25cDf",
+    "DonationNFT": "0x24d896Fc1dDAA6c7684E4667aD096208bC3b1D99"
+  },
+  "deployer": "0xb129612fE438C9d12b5B650De111a3EDb11B3DA4",
+  "timestamp": "2025-10-17T03:18:14.385Z"
+}

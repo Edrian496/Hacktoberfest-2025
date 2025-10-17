@@ -8,8 +8,8 @@ import {
   Interface,
 } from "ethers";
 import type { Signer, ContractDeployTransaction, ContractRunner } from "ethers";
-import type { NonPayableOverrides } from "../common";
-import type { Counter, CounterInterface } from "../Counter";
+import type { NonPayableOverrides } from "../../common";
+import type { Counter, CounterInterface } from "../../contracts/Counter";
 
 const _abi = [
   {

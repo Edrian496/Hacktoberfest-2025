@@ -3,12 +3,12 @@
 /* eslint-disable */
 import type {
   BaseContract,
-  BigNumberish,
   BytesLike,
   FunctionFragment,
   Result,
   Interface,
   EventFragment,
+  AddressLike,
   ContractRunner,
   ContractMethod,
   Listener,
@@ -20,27 +20,23 @@ import type {
   TypedLogDescription,
   TypedListener,
   TypedContractMethod,
-} from "./common";
+} from "../../../common";
 
-export interface CounterInterface extends Interface {
-  getFunction(nameOrSignature: "inc" | "incBy" | "x"): FunctionFragment;
+export interface PausableInterface extends Interface {
+  getFunction(nameOrSignature: "paused"): FunctionFragment;
 
-  getEvent(nameOrSignatureOrTopic: "Increment"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Paused" | "Unpaused"): EventFragment;
 
-  encodeFunctionData(functionFragment: "inc", values?: undefined): string;
-  encodeFunctionData(functionFragment: "incBy", values: [BigNumberish]): string;
-  encodeFunctionData(functionFragment: "x", values?: undefined): string;
+  encodeFunctionData(functionFragment: "paused", values?: undefined): string;
 
-  decodeFunctionResult(functionFragment: "inc", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "incBy", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "x", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "paused", data: BytesLike): Result;
 }
 
-export namespace IncrementEvent {
-  export type InputTuple = [by: BigNumberish];
-  export type OutputTuple = [by: bigint];
+export namespace PausedEvent {
+  export type InputTuple = [account: AddressLike];
+  export type OutputTuple = [account: string];
   export interface OutputObject {
-    by: bigint;
+    account: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -48,11 +44,23 @@ export namespace IncrementEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export interface Counter extends BaseContract {
-  connect(runner?: ContractRunner | null): Counter;
+export namespace UnpausedEvent {
+  export type InputTuple = [account: AddressLike];
+  export type OutputTuple = [account: string];
+  export interface OutputObject {
+    account: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export interface Pausable extends BaseContract {
+  connect(runner?: ContractRunner | null): Pausable;
   waitForDeployment(): Promise<this>;
 
-  interface: CounterInterface;
+  interface: PausableInterface;
 
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
@@ -91,42 +99,52 @@ export interface Counter extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
-  inc: TypedContractMethod<[], [void], "nonpayable">;
-
-  incBy: TypedContractMethod<[by: BigNumberish], [void], "nonpayable">;
-
-  x: TypedContractMethod<[], [bigint], "view">;
+  paused: TypedContractMethod<[], [boolean], "view">;
 
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
 
   getFunction(
-    nameOrSignature: "inc"
-  ): TypedContractMethod<[], [void], "nonpayable">;
-  getFunction(
-    nameOrSignature: "incBy"
-  ): TypedContractMethod<[by: BigNumberish], [void], "nonpayable">;
-  getFunction(nameOrSignature: "x"): TypedContractMethod<[], [bigint], "view">;
+    nameOrSignature: "paused"
+  ): TypedContractMethod<[], [boolean], "view">;
 
   getEvent(
-    key: "Increment"
+    key: "Paused"
   ): TypedContractEvent<
-    IncrementEvent.InputTuple,
-    IncrementEvent.OutputTuple,
-    IncrementEvent.OutputObject
+    PausedEvent.InputTuple,
+    PausedEvent.OutputTuple,
+    PausedEvent.OutputObject
+  >;
+  getEvent(
+    key: "Unpaused"
+  ): TypedContractEvent<
+    UnpausedEvent.InputTuple,
+    UnpausedEvent.OutputTuple,
+    UnpausedEvent.OutputObject
   >;
 
   filters: {
-    "Increment(uint256)": TypedContractEvent<
-      IncrementEvent.InputTuple,
-      IncrementEvent.OutputTuple,
-      IncrementEvent.OutputObject
+    "Paused(address)": TypedContractEvent<
+      PausedEvent.InputTuple,
+      PausedEvent.OutputTuple,
+      PausedEvent.OutputObject
     >;
-    Increment: TypedContractEvent<
-      IncrementEvent.InputTuple,
-      IncrementEvent.OutputTuple,
-      IncrementEvent.OutputObject
+    Paused: TypedContractEvent<
+      PausedEvent.InputTuple,
+      PausedEvent.OutputTuple,
+      PausedEvent.OutputObject
+    >;
+
+    "Unpaused(address)": TypedContractEvent<
+      UnpausedEvent.InputTuple,
+      UnpausedEvent.OutputTuple,
+      UnpausedEvent.OutputObject
+    >;
+    Unpaused: TypedContractEvent<
+      UnpausedEvent.InputTuple,
+      UnpausedEvent.OutputTuple,
+      UnpausedEvent.OutputObject
     >;
   };
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { ReactNode } from "react";
 import { MapPin, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +22,7 @@ interface DisasterCardProps {
   fundsRaised?: number;
   fundGoal?: number;
   onDonate: (id: string) => void;
+  children?: ReactNode; // ✅ Add children prop
 }
 
 export function DisasterCard({
@@ -33,12 +35,13 @@ export function DisasterCard({
   fundsRaised,
   fundGoal,
   onDonate,
+  children, // ✅ Accept children
 }: DisasterCardProps) {
   const progress = fundGoal && fundsRaised ? (fundsRaised / fundGoal) * 100 : 0;
 
   return (
     <Card className="hover:shadow-lg transition-shadow flex flex-col h-full">
-      {/* Header - Fixed height area */}
+      {/* Header */}
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start gap-2">
           <CardTitle className="line-clamp-2 text-base sm:text-lg font-semibold min-h-[3rem] flex items-start">
@@ -57,7 +60,7 @@ export function DisasterCard({
         </div>
       </CardHeader>
 
-      {/* Content - Flexible growing area */}
+      {/* Content */}
       <CardContent className="space-y-3 flex-grow pb-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <MapPin className="w-4 h-4 shrink-0" />
@@ -71,7 +74,7 @@ export function DisasterCard({
           {description}
         </p>
 
-        {/* Progress bar - Consistent spacing */}
+        {/* Progress */}
         {fundGoal && (
           <div className="space-y-2 pt-2">
             <div className="flex justify-between text-xs sm:text-sm gap-2">
@@ -91,9 +94,12 @@ export function DisasterCard({
             </div>
           </div>
         )}
+
+        {/* ✅ Render any children passed */}
+        {children && <div className="mt-2">{children}</div>}
       </CardContent>
 
-      {/* Footer - Fixed at bottom */}
+      {/* Footer */}
       <CardFooter className="pt-0 mt-auto">
         <Button
           onClick={() => onDonate(id)}
