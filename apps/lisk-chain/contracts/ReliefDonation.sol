@@ -120,6 +120,12 @@ contract ReliefDonation is AccessControl, ReentrancyGuard, Pausable {
         
         emit CampaignCreated(campaignCounter, _name, msg.sender);
     }
+    // Only admin or owner can delete
+    function deleteCampaign(uint256 _id) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(campaigns[_id].exists, "Campaign does not exist");
+        delete campaigns[_id];
+        emit CampaignDeleted(_id);
+    }
 
     /**
      * @dev Update an existing campaign

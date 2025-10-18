@@ -11,18 +11,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Disaster } from "@/types/Disaster"; // Make sure your type includes all campaign fields
 
-interface DisasterCardProps {
-  id: string;
-  title: string;
-  location: string;
-  description: string;
-  date: string;
-  status: "active" | "completed";
-  fundsRaised?: number;
-  fundGoal?: number;
-  onDonate: (id: string) => void;
-  children?: ReactNode; // ✅ Add children prop
+interface DisasterCardProps extends Disaster {
+  onDonate?: (campaign: Disaster) => void;
+  onEdit?: (campaign: Disaster) => void;
+  onDelete?: (id: string) => void; // <-- new prop
+  showDonateButton?: boolean;
+  isAdmin?: boolean;
+  children?: ReactNode;
 }
 
 export function DisasterCard({
@@ -35,9 +32,19 @@ export function DisasterCard({
   fundsRaised,
   fundGoal,
   onDonate,
-  children, // ✅ Accept children
+  onEdit,
+  onDelete, // <-- new prop
+  showDonateButton = true,
+  isAdmin = false,
+  children,
 }: DisasterCardProps) {
   const progress = fundGoal && fundsRaised ? (fundsRaised / fundGoal) * 100 : 0;
+
+  const handleDelete = () => {
+    if (confirm("Are you sure you want to delete this campaign?")) {
+      onDelete?.(id);
+    }
+  };
 
   return (
     <Card className="hover:shadow-lg transition-shadow flex flex-col h-full">
@@ -74,7 +81,7 @@ export function DisasterCard({
           {description}
         </p>
 
-        {/* Progress */}
+        {/* Progress bar */}
         {fundGoal && (
           <div className="space-y-2 pt-2">
             <div className="flex justify-between text-xs sm:text-sm gap-2">
@@ -95,19 +102,67 @@ export function DisasterCard({
           </div>
         )}
 
-        {/* ✅ Render any children passed */}
+        {/* Children */}
         {children && <div className="mt-2">{children}</div>}
       </CardContent>
 
       {/* Footer */}
-      <CardFooter className="pt-0 mt-auto">
-        <Button
-          onClick={() => onDonate(id)}
-          className="w-full bg-primary hover:bg-primary/90 h-10 sm:h-11"
-          disabled={status === "completed"}
-        >
-          {status === "completed" ? "Campaign Closed" : "Donate"}
-        </Button>
+      <CardFooter className="pt-0 mt-auto flex flex-col gap-2">
+        {/* Admin-only Buttons */}
+        {isAdmin && (
+          <div className="flex flex-col sm:flex-row gap-2 w-full">
+            {onEdit && (
+              <Button
+                onClick={() =>
+                  onEdit({
+                    id,
+                    title,
+                    description,
+                    location,
+                    date,
+                    status,
+                    fundsRaised,
+                    fundGoal,
+                  })
+                }
+                className="flex-1 bg-blue-600 hover:bg-blue-700 h-10 sm:h-11"
+              >
+                Edit
+              </Button>
+            )}
+
+            {onDelete && (
+              <Button
+                onClick={handleDelete}
+                className="flex-1 bg-red-600 hover:bg-red-700 h-10 sm:h-11"
+              >
+                Delete
+              </Button>
+            )}
+          </div>
+        )}
+
+        {/* Donate button for all users */}
+        {showDonateButton && onDonate && (
+          <Button
+            onClick={() =>
+              onDonate({
+                id,
+                title,
+                description,
+                location,
+                date,
+                status,
+                fundsRaised,
+                fundGoal,
+              })
+            }
+            className="w-full bg-primary hover:bg-primary/90 h-10 sm:h-11"
+            disabled={status === "completed"}
+          >
+            {status === "completed" ? "Campaign Closed" : "Donate"}
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );
