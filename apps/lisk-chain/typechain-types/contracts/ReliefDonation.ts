@@ -60,6 +60,7 @@ export interface ReliefDonationInterface extends Interface {
       | "campaignMilestones"
       | "campaigns"
       | "createCampaign"
+      | "deleteCampaign"
       | "disburseFunds"
       | "disbursementCounter"
       | "disbursements"
@@ -82,6 +83,7 @@ export interface ReliefDonationInterface extends Interface {
       | "revokeRole"
       | "supportsInterface"
       | "unpause"
+      | "updateCampaign"
       | "verifyCampaign"
       | "verifyDisbursement"
       | "verifyReceipt"
@@ -90,6 +92,8 @@ export interface ReliefDonationInterface extends Interface {
   getEvent(
     nameOrSignatureOrTopic:
       | "CampaignCreated"
+      | "CampaignDeleted"
+      | "CampaignUpdated"
       | "CampaignVerified"
       | "DisbursementVerified"
       | "DonationReceived"
@@ -138,6 +142,10 @@ export interface ReliefDonationInterface extends Interface {
   encodeFunctionData(
     functionFragment: "createCampaign",
     values: [string, string, BigNumberish, BigNumberish, string, BigNumberish[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "deleteCampaign",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "disburseFunds",
@@ -219,6 +227,18 @@ export interface ReliefDonationInterface extends Interface {
   ): string;
   encodeFunctionData(functionFragment: "unpause", values?: undefined): string;
   encodeFunctionData(
+    functionFragment: "updateCampaign",
+    values: [
+      BigNumberish,
+      string,
+      string,
+      BigNumberish,
+      BigNumberish,
+      string,
+      BigNumberish[]
+    ]
+  ): string;
+  encodeFunctionData(
     functionFragment: "verifyCampaign",
     values: [BigNumberish]
   ): string;
@@ -260,6 +280,10 @@ export interface ReliefDonationInterface extends Interface {
   decodeFunctionResult(functionFragment: "campaigns", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "createCampaign",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "deleteCampaign",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -327,6 +351,10 @@ export interface ReliefDonationInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "unpause", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "updateCampaign",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "verifyCampaign",
     data: BytesLike
   ): Result;
@@ -341,6 +369,36 @@ export interface ReliefDonationInterface extends Interface {
 }
 
 export namespace CampaignCreatedEvent {
+  export type InputTuple = [
+    campaignId: BigNumberish,
+    name: string,
+    ngo: AddressLike
+  ];
+  export type OutputTuple = [campaignId: bigint, name: string, ngo: string];
+  export interface OutputObject {
+    campaignId: bigint;
+    name: string;
+    ngo: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace CampaignDeletedEvent {
+  export type InputTuple = [campaignId: BigNumberish];
+  export type OutputTuple = [campaignId: bigint];
+  export interface OutputObject {
+    campaignId: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace CampaignUpdatedEvent {
   export type InputTuple = [
     campaignId: BigNumberish,
     name: string,
@@ -620,6 +678,7 @@ export interface ReliefDonation extends BaseContract {
         bigint,
         boolean,
         boolean,
+        boolean,
         string
       ] & {
         id: bigint;
@@ -633,6 +692,7 @@ export interface ReliefDonation extends BaseContract {
         endTime: bigint;
         isVerified: boolean;
         isActive: boolean;
+        isDeleted: boolean;
         ipfsMetadata: string;
       }
     ],
@@ -648,6 +708,12 @@ export interface ReliefDonation extends BaseContract {
       _ipfsMetadata: string,
       _milestones: BigNumberish[]
     ],
+    [void],
+    "nonpayable"
+  >;
+
+  deleteCampaign: TypedContractMethod<
+    [_id: BigNumberish],
     [void],
     "nonpayable"
   >;
@@ -788,6 +854,20 @@ export interface ReliefDonation extends BaseContract {
 
   unpause: TypedContractMethod<[], [void], "nonpayable">;
 
+  updateCampaign: TypedContractMethod<
+    [
+      _id: BigNumberish,
+      _name: string,
+      _description: string,
+      _targetAmount: BigNumberish,
+      _duration: BigNumberish,
+      _ipfsMetadata: string,
+      _milestones: BigNumberish[]
+    ],
+    [void],
+    "nonpayable"
+  >;
+
   verifyCampaign: TypedContractMethod<
     [_campaignId: BigNumberish],
     [void],
@@ -859,6 +939,7 @@ export interface ReliefDonation extends BaseContract {
         bigint,
         boolean,
         boolean,
+        boolean,
         string
       ] & {
         id: bigint;
@@ -872,6 +953,7 @@ export interface ReliefDonation extends BaseContract {
         endTime: bigint;
         isVerified: boolean;
         isActive: boolean;
+        isDeleted: boolean;
         ipfsMetadata: string;
       }
     ],
@@ -891,6 +973,9 @@ export interface ReliefDonation extends BaseContract {
     [void],
     "nonpayable"
   >;
+  getFunction(
+    nameOrSignature: "deleteCampaign"
+  ): TypedContractMethod<[_id: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "disburseFunds"
   ): TypedContractMethod<
@@ -1034,6 +1119,21 @@ export interface ReliefDonation extends BaseContract {
     nameOrSignature: "unpause"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "updateCampaign"
+  ): TypedContractMethod<
+    [
+      _id: BigNumberish,
+      _name: string,
+      _description: string,
+      _targetAmount: BigNumberish,
+      _duration: BigNumberish,
+      _ipfsMetadata: string,
+      _milestones: BigNumberish[]
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "verifyCampaign"
   ): TypedContractMethod<[_campaignId: BigNumberish], [void], "nonpayable">;
   getFunction(
@@ -1053,6 +1153,20 @@ export interface ReliefDonation extends BaseContract {
     CampaignCreatedEvent.InputTuple,
     CampaignCreatedEvent.OutputTuple,
     CampaignCreatedEvent.OutputObject
+  >;
+  getEvent(
+    key: "CampaignDeleted"
+  ): TypedContractEvent<
+    CampaignDeletedEvent.InputTuple,
+    CampaignDeletedEvent.OutputTuple,
+    CampaignDeletedEvent.OutputObject
+  >;
+  getEvent(
+    key: "CampaignUpdated"
+  ): TypedContractEvent<
+    CampaignUpdatedEvent.InputTuple,
+    CampaignUpdatedEvent.OutputTuple,
+    CampaignUpdatedEvent.OutputObject
   >;
   getEvent(
     key: "CampaignVerified"
@@ -1135,6 +1249,28 @@ export interface ReliefDonation extends BaseContract {
       CampaignCreatedEvent.InputTuple,
       CampaignCreatedEvent.OutputTuple,
       CampaignCreatedEvent.OutputObject
+    >;
+
+    "CampaignDeleted(uint256)": TypedContractEvent<
+      CampaignDeletedEvent.InputTuple,
+      CampaignDeletedEvent.OutputTuple,
+      CampaignDeletedEvent.OutputObject
+    >;
+    CampaignDeleted: TypedContractEvent<
+      CampaignDeletedEvent.InputTuple,
+      CampaignDeletedEvent.OutputTuple,
+      CampaignDeletedEvent.OutputObject
+    >;
+
+    "CampaignUpdated(uint256,string,address)": TypedContractEvent<
+      CampaignUpdatedEvent.InputTuple,
+      CampaignUpdatedEvent.OutputTuple,
+      CampaignUpdatedEvent.OutputObject
+    >;
+    CampaignUpdated: TypedContractEvent<
+      CampaignUpdatedEvent.InputTuple,
+      CampaignUpdatedEvent.OutputTuple,
+      CampaignUpdatedEvent.OutputObject
     >;
 
     "CampaignVerified(uint256,address)": TypedContractEvent<

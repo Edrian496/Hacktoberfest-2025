@@ -11,18 +11,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Disaster } from "@/types/Disaster";
 
-interface DisasterCardProps {
-  id: string;
-  title: string;
-  location: string;
-  description: string;
-  date: string;
-  status: "active" | "completed";
-  fundsRaised?: number;
-  fundGoal?: number;
-  onDonate: (id: string) => void;
-  children?: ReactNode; // ✅ Add children prop
+interface DisasterCardProps extends Disaster {
+  onDonate?: (campaign: Disaster) => void;
+  showDonateButton?: boolean;
+  children?: ReactNode;
 }
 
 export function DisasterCard({
@@ -35,7 +29,8 @@ export function DisasterCard({
   fundsRaised,
   fundGoal,
   onDonate,
-  children, // ✅ Accept children
+  showDonateButton = true,
+  children,
 }: DisasterCardProps) {
   const progress = fundGoal && fundsRaised ? (fundsRaised / fundGoal) * 100 : 0;
 
@@ -74,7 +69,7 @@ export function DisasterCard({
           {description}
         </p>
 
-        {/* Progress */}
+        {/* Progress bar */}
         {fundGoal && (
           <div className="space-y-2 pt-2">
             <div className="flex justify-between text-xs sm:text-sm gap-2">
@@ -95,19 +90,33 @@ export function DisasterCard({
           </div>
         )}
 
-        {/* ✅ Render any children passed */}
+        {/* Children */}
         {children && <div className="mt-2">{children}</div>}
       </CardContent>
 
       {/* Footer */}
-      <CardFooter className="pt-0 mt-auto">
-        <Button
-          onClick={() => onDonate(id)}
-          className="w-full bg-primary hover:bg-primary/90 h-10 sm:h-11"
-          disabled={status === "completed"}
-        >
-          {status === "completed" ? "Campaign Closed" : "Donate"}
-        </Button>
+      <CardFooter className="pt-0 mt-auto flex flex-col gap-2">
+        {/* Donate button for all users */}
+        {showDonateButton && onDonate && (
+          <Button
+            onClick={() =>
+              onDonate({
+                id,
+                title,
+                description,
+                location,
+                date,
+                status,
+                fundsRaised,
+                fundGoal,
+              })
+            }
+            className="w-full bg-primary hover:bg-primary/90 h-10 sm:h-11"
+            disabled={status === "completed"}
+          >
+            {status === "completed" ? "Campaign Closed" : "Donate"}
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

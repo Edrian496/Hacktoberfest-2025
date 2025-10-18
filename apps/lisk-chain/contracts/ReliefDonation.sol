@@ -30,6 +30,7 @@ contract ReliefDonation is AccessControl, ReentrancyGuard, Pausable {
         uint256 endTime;
         bool isVerified;
         bool isActive;
+        bool isDeleted;
         string ipfsMetadata; // IPFS hash for detailed info
     }
 
@@ -78,6 +79,8 @@ contract ReliefDonation is AccessControl, ReentrancyGuard, Pausable {
     // Events
     event CampaignCreated(uint256 indexed campaignId, string name, address indexed ngo);
     event CampaignVerified(uint256 indexed campaignId, address indexed verifier);
+    event CampaignUpdated(uint256 indexed campaignId, string name, address indexed ngo);
+    event CampaignDeleted(uint256 indexed campaignId);
     event DonationReceived(uint256 indexed campaignId, address indexed donor, uint256 amount);
     event FundsDisbursed(uint256 indexed disbursementId, uint256 campaignId, uint256 amount, string purpose);
     event DisbursementVerified(uint256 indexed disbursementId, address indexed verifier);
@@ -118,6 +121,47 @@ contract ReliefDonation is AccessControl, ReentrancyGuard, Pausable {
         }
         
         emit CampaignCreated(campaignCounter, _name, msg.sender);
+    }
+    // Only admin or owner can delete
+    function deleteCampaign(uint256 _id) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        Campaign storage campaign = campaigns[_id];
+        require(campaign.id != 0, "Campaign does not exist");
+        require(!campaign.isDeleted, "Campaign already deleted");
+
+        campaign.isDeleted = true;
+        campaign.isActive = false; // optional
+        emit CampaignDeleted(_id);
+    }
+
+
+    /**
+     * @dev Update an existing campaign
+     */
+    function updateCampaign(
+        uint256 _id,
+        string memory _name,
+        string memory _description,
+        uint256 _targetAmount,
+        uint256 _duration,
+        string memory _ipfsMetadata,
+        uint256[] memory _milestones
+    ) external onlyRole(NGO_ROLE) {
+        Campaign storage campaign = campaigns[_id];
+        require(campaign.id != 0, "Campaign does not exist");
+        require(campaign.isActive, "Campaign is not active");
+        require(campaign.ngoAddress == msg.sender, "Not campaign owner");
+
+        campaign.name = _name;
+        campaign.description = _description;
+        campaign.targetAmount = _targetAmount;
+        campaign.endTime = block.timestamp + _duration;
+        campaign.ipfsMetadata = _ipfsMetadata;
+
+        if (_milestones.length > 0) {
+            campaignMilestones[_id] = _milestones;
+        }
+        
+        emit CampaignUpdated(_id, _name, msg.sender);
     }
 
     /**
