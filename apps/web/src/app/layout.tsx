@@ -16,7 +16,8 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: "Bangon",
+  title: "TrustChain",
+  description: "Bridging the trust gap in disaster relief through blockchain technology and AI-powered verification.",
   icons: {
     icon: "./imports/logo.png", 
   },

@@ -117,7 +117,8 @@ export default function DonationsPage() {
       <main className="flex-1 p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
-            <h1 className="mb-2 font-bold">My Donations</h1>
+             <h1 className="text-4xl font-bold mb-2 h-12 bg-gradient-to-r from-[var(--secondary)] to-blue-500 bg-clip-text text-transparent">
+              My Donations</h1>
             <p className="text-muted-foreground">
               View your donation history and track them on the blockchain
             </p>

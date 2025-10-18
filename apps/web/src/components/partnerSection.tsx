@@ -62,7 +62,8 @@ export function PartnersSection() {
         {/* Header */}
         <div className="text-center mb-8">
           <h2 className="font-['Manrope:Bold',_sans-serif] font-bold text-[60px] leading-[60px] text-gray-900 mb-6">
-            TRUSTED PARTNERS
+            <span className="text-blue-900 text-[60px]]">TRUSTED </span>
+    <span className="text-[#FACC15]">PARTNERS</span>
           </h2>
           <p className="font-['Nunito:Regular',_sans-serif] font-normal text-[24px] leading-[39px] text-[rgba(17,24,39,0.8)] max-w-4xl mx-auto">
             Working together with world-class organizations to deliver transparent, effective disaster relief.

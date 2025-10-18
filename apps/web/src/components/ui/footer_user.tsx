@@ -1,22 +1,8 @@
 "use client";
 
-import React from 'react';
-import { useRouter } from 'next/navigation';
-import { useUser } from '@/lib/useUser';
-
-function Group8() {
-  return (
-    <div className="relative ml-2 mt-2">
-      <div className="relative w-[67px] h-[67px]">
-        <img
-          alt=""
-          className="absolute inset-0.5 w-full h-full object-cover -translate-y-[45px]"
-          src="./imports/emblem_small.png"
-        />
-      </div>
-    </div>
-  );
-}
+import React from "react";
+import { useRouter } from "next/navigation";
+import { useUser } from "@/lib/useUser";
 
 function BrandSection({ isAuthenticated }: { isAuthenticated: boolean }) {
   const router = useRouter();
@@ -36,7 +22,7 @@ function BrandSection({ isAuthenticated }: { isAuthenticated: boolean }) {
   const handleBrandLogoClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (isAuthenticated) {
-      router.push('/dashboard');
+      router.push("/dashboard");
     } else {
       // Check if we're on a page with sections or need to navigate home first
       const homeSection = document.getElementById("home");
@@ -45,7 +31,7 @@ function BrandSection({ isAuthenticated }: { isAuthenticated: boolean }) {
         scrollToSection("home");
       } else {
         // Navigate to home page first
-        router.push('/');
+        router.push("/");
       }
     }
   };
@@ -53,13 +39,14 @@ function BrandSection({ isAuthenticated }: { isAuthenticated: boolean }) {
   return (
     <div className="flex flex-col items-center lg:items-start">
       <div className="relative mb-4">
-        <div className="relative h-[30px] w-[184px] cursor-pointer" onClick={handleBrandLogoClick}>
-          <p className="absolute font-['Manrope:Bold',_sans-serif] font-bold h-[30px] leading-[28px] left-0 text-[40px] text-gray-100 top-0 w-[184px] whitespace-pre-wrap">
-            {`B   NGON`}
-          </p>
-          <div className="absolute left-[2px] top-[18px]">
-            <Group8 />
-          </div>
+        <div
+          className="relative h-[30px] w-[184px] cursor-pointer"
+          onClick={handleBrandLogoClick}
+        >
+          <h1 className="absolute font-['Manrope:Bold',_sans-serif] font-bold h-[30px] leading-[28px] left-0 text-[40px] top-0 w-[184px] whitespace-pre-wrap">
+            <span className="text-white text-4xl">Trust</span>
+            <span className="text-[var(--accent)]">Chain</span>
+          </h1>
         </div>
       </div>
 
@@ -93,7 +80,7 @@ function QuickLinks({ isAuthenticated }: { isAuthenticated: boolean }) {
       // Always scroll smoothly, even if already on the page
       const targetPosition = target.offsetTop - HEADER_HEIGHT;
       const currentPosition = window.pageYOffset;
-      
+
       // Calculate if we need to scroll
       if (Math.abs(targetPosition - currentPosition) > 5) {
         window.scrollTo({
@@ -127,9 +114,12 @@ function QuickLinks({ isAuthenticated }: { isAuthenticated: boolean }) {
 
   const links = isAuthenticated ? authenticatedLinks : guestLinks;
 
-  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, link: any) => {
+  const handleLinkClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    link: any
+  ) => {
     e.preventDefault();
-    
+
     if (isAuthenticated && link.route) {
       // For authenticated users, navigate to routes
       router.push(link.route);
@@ -170,7 +160,7 @@ function QuickLinks({ isAuthenticated }: { isAuthenticated: boolean }) {
 
 function ContactInfo() {
   const contactItems = [
-    { label: "support@bangon.org", type: "email" },
+    { label: "support@trustchain.org", type: "email" },
     { label: "+1 (555) 123-4567", type: "phone" },
   ];
 
@@ -215,7 +205,7 @@ export function Footer() {
 
         <div className="border-t border-gray-100 pt-8">
           <p className="font-['Nunito:Regular',_sans-serif] font-normal leading-[20px] text-[#d1d5dc] text-[14px] text-center">
-            © 2025 Bangon. All rights reserved.
+            © 2025 TrustChain. All rights reserved.
           </p>
         </div>
       </div>

@@ -6,8 +6,8 @@ export function AboutSection() {
       <div className="max-w-7xl mx-auto px-8">
         {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="font-['Manrope:Bold',_sans-serif] font-bold text-[60px] leading-[60px] text-[#101828] mb-6">
-            ABOUT BANGON
+          <h2 className="font-['Manrope:Bold',_sans-serif] font-bold text-[60px] leading-[60px] text-[var(--secondary)] mb-6">
+            ABOUT
           </h2>
           <p className="font-['Nunito:Regular',_sans-serif] font-normal text-[24px] leading-[39px] text-[#4a5565] max-w-[896px] mx-auto">
             Bridging the trust gap in disaster relief through blockchain technology and AI-powered verification.
@@ -19,7 +19,7 @@ export function AboutSection() {
           {/* Image */}
           <div className="h-[384px] rounded-[16px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] overflow-hidden">
             <img 
-              alt="About Bangon" 
+              alt="About TrustChain" 
               className="w-full h-full object-cover" 
               src="./imports/about.png" 
             />
@@ -31,7 +31,7 @@ export function AboutSection() {
               In times of crisis, people want to help but face challenges with trust in donation handling and exposure to misinformation.
             </p>
             <p className="font-['Nunito:Regular',_sans-serif] font-normal text-[18px] leading-[29.25px] text-[#4a5565]">
-              Bangon combines blockchain transparency with AI-driven fact-checking to ensure donations reach those who need them most while providing accurate, verified information to communities.
+              TrustChain combines blockchain transparency with AI-driven fact-checking to ensure donations reach those who need them most while providing accurate, verified information to communities.
             </p>
           </div>
         </div>
