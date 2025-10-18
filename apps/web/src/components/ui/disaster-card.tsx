@@ -11,14 +11,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Disaster } from "@/types/Disaster"; // Make sure your type includes all campaign fields
+import { Disaster } from "@/types/Disaster";
 
 interface DisasterCardProps extends Disaster {
   onDonate?: (campaign: Disaster) => void;
-  onEdit?: (campaign: Disaster) => void;
-  onDelete?: (id: string) => void; // <-- new prop
   showDonateButton?: boolean;
-  isAdmin?: boolean;
   children?: ReactNode;
 }
 
@@ -32,19 +29,10 @@ export function DisasterCard({
   fundsRaised,
   fundGoal,
   onDonate,
-  onEdit,
-  onDelete, // <-- new prop
   showDonateButton = true,
-  isAdmin = false,
   children,
 }: DisasterCardProps) {
   const progress = fundGoal && fundsRaised ? (fundsRaised / fundGoal) * 100 : 0;
-
-  const handleDelete = () => {
-    if (confirm("Are you sure you want to delete this campaign?")) {
-      onDelete?.(id);
-    }
-  };
 
   return (
     <Card className="hover:shadow-lg transition-shadow flex flex-col h-full">
@@ -108,40 +96,6 @@ export function DisasterCard({
 
       {/* Footer */}
       <CardFooter className="pt-0 mt-auto flex flex-col gap-2">
-        {/* Admin-only Buttons */}
-        {isAdmin && (
-          <div className="flex flex-col sm:flex-row gap-2 w-full">
-            {onEdit && (
-              <Button
-                onClick={() =>
-                  onEdit({
-                    id,
-                    title,
-                    description,
-                    location,
-                    date,
-                    status,
-                    fundsRaised,
-                    fundGoal,
-                  })
-                }
-                className="flex-1 bg-blue-600 hover:bg-blue-700 h-10 sm:h-11"
-              >
-                Edit
-              </Button>
-            )}
-
-            {onDelete && (
-              <Button
-                onClick={handleDelete}
-                className="flex-1 bg-red-600 hover:bg-red-700 h-10 sm:h-11"
-              >
-                Delete
-              </Button>
-            )}
-          </div>
-        )}
-
         {/* Donate button for all users */}
         {showDonateButton && onDonate && (
           <Button

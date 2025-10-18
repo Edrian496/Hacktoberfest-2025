@@ -16,19 +16,18 @@ export default function AdminDashboard() {
   const [walletBalance, setWalletBalance] = useState<string>("0");
   const [walletAddress, setWalletAddress] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCampaign, setEditingCampaign] = useState<Disaster | null>(null);
 
-  useEffect(() => {
-    fetchWalletInfo();
-    fetchCampaigns();
-  }, []);
+  const getProviderAndSigner = async () => {
+    if (!window.ethereum) throw new Error("Ethereum wallet not found");
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    await window.ethereum.request({ method: "eth_requestAccounts" });
+    const signer = await provider.getSigner();
+    return { provider, signer };
+  };
 
   const fetchWalletInfo = async () => {
-    if (!window.ethereum) return;
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      await window.ethereum.request({ method: "eth_requestAccounts" });
-      const signer = await provider.getSigner();
+      const { provider, signer } = await getProviderAndSigner();
       const address = await signer.getAddress();
       const balance = await provider.getBalance(address);
       setWalletAddress(address);
@@ -39,9 +38,8 @@ export default function AdminDashboard() {
   };
 
   const fetchCampaigns = async () => {
-    if (!window.ethereum) return;
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
+      const { provider } = await getProviderAndSigner();
       const reliefContract = new ethers.Contract(
         deployment.contracts.ReliefDonation,
         ReliefDonationAbi.abi,
@@ -49,31 +47,27 @@ export default function AdminDashboard() {
       );
 
       const campaignCounter = await reliefContract.campaignCounter();
-      const totalCampaigns = Number(campaignCounter);
       const campaigns: Disaster[] = [];
 
-      for (let i = 1; i <= totalCampaigns; i++) {
-        try {
-          const campaign = await reliefContract.campaigns(i);
-          campaigns.push({
-            id: campaign.id.toString(),
-            title: campaign.name,
-            description: campaign.description,
-            status: campaign.isActive ? "active" : "completed",
-            isVerified: campaign.isVerified, // keep boolean
-            fundsRaised: parseFloat(ethers.formatEther(campaign.raisedAmount)),
-            fundGoal: parseFloat(ethers.formatEther(campaign.targetAmount)),
-            location: "", // you can remove string check, not needed
-            date: new Date(Number(campaign.startTime) * 1000).toLocaleDateString(
-              "en-US",
-              { month: "long", day: "numeric", year: "numeric" }
-            ),
-          });
-        } catch (err) {
-          console.error(`Error fetching campaign ${i}:`, err);
-        }
-      }
+      for (let i = 1; i <= Number(campaignCounter); i++) {
+        const campaign = await reliefContract.campaigns(i);
+        if (campaign.isDeleted) continue;
 
+        campaigns.push({
+          id: campaign.id.toString(),
+          title: campaign.name,
+          description: campaign.description,
+          status: campaign.isActive ? "active" : "completed",
+          isVerified: campaign.isVerified,
+          fundsRaised: parseFloat(ethers.formatEther(campaign.raisedAmount)),
+          fundGoal: parseFloat(ethers.formatEther(campaign.targetAmount)),
+          location: "",
+          date: new Date(Number(campaign.startTime) * 1000).toLocaleDateString(
+            "en-US",
+            { month: "long", day: "numeric", year: "numeric" }
+          ),
+        });
+      }
 
       setDisasters(campaigns);
     } catch (err) {
@@ -82,10 +76,8 @@ export default function AdminDashboard() {
   };
 
   const verifyCampaign = async (campaignId: string) => {
-    if (!window.ethereum) return;
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
+      const { signer } = await getProviderAndSigner();
       const reliefContract = new ethers.Contract(
         deployment.contracts.ReliefDonation,
         ReliefDonationAbi.abi,
@@ -101,40 +93,14 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleEditClick = (campaign: Disaster) => {
-    setEditingCampaign(campaign);
-    setIsModalOpen(true);
-  };
-
   const handleCreateClick = () => {
-    setEditingCampaign(null);
     setIsModalOpen(true);
   };
-const handleDelete = async (id: string) => {
-  if (!window.ethereum) return;
 
-  try {
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    await window.ethereum.request({ method: "eth_requestAccounts" });
-    const signer = await provider.getSigner();
-
-    const reliefContract = new ethers.Contract(
-      deployment.contracts.ReliefDonation,
-      ReliefDonationAbi.abi,
-      signer
-    );
-
-    const tx = await reliefContract.deleteCampaign(id);
-    await tx.wait();
-    alert("Campaign deleted successfully!");
-    fetchCampaigns(); // refresh the campaigns list
-  } catch (err: any) {
-    console.error("Delete failed:", err);
-    alert(`Failed to delete campaign: ${err.reason || err.message}`);
-  }
-};
-
-
+  useEffect(() => {
+    fetchWalletInfo();
+    fetchCampaigns();
+  }, []);
 
   const totalCampaigns = disasters.length;
   const totalFundsRaised = disasters.reduce(
@@ -149,16 +115,11 @@ const handleDelete = async (id: string) => {
         <h1 className="mb-2 text-3xl font-bold text-gray-900">Admin Dashboard</h1>
         <p className="text-gray-600 mb-6">Manage disaster campaigns and monitor donations</p>
 
-        {/* Modal for create/edit */}
         <div className="mb-6 flex gap-2">
-          <Button onClick={handleCreateClick} size="sm" className="flex items-center gap-2">
-            + Create Campaign
-          </Button>
 
           <CreateCampaignModal
             open={isModalOpen}
             onClose={() => setIsModalOpen(false)}
-            campaign={editingCampaign}
             onCampaignCreated={fetchCampaigns}
           />
         </div>
@@ -208,9 +169,6 @@ const handleDelete = async (id: string) => {
                   key={disaster.id}
                   {...disaster}
                   showDonateButton={false}
-                  isAdmin={true}
-                  onEdit={handleEditClick}
-                  onDelete={handleDelete}
                 >
                   <div className="flex flex-col gap-2 mt-4">
                     <div className="w-full bg-gray-200 rounded-full h-3">
@@ -228,22 +186,16 @@ const handleDelete = async (id: string) => {
                     <p className="text-xs text-gray-600">
                       {disaster.fundsRaised?.toFixed(4)} / {disaster.fundGoal?.toFixed(4)} ETH
                     </p>
-                      {!disaster.isVerified ? (
-                        <Button
-                          onClick={() => verifyCampaign(disaster.id)}
-                          variant="default"
-                          size="sm"
-                          className="w-full bg-blue-600 hover:bg-blue-700"
-                        >
-                          ✓ Verify Campaign
-                        </Button>
-                      ) : (
-                        <div className="flex items-center justify-center gap-2 p-2 bg-green-50 rounded-md border border-green-200">
-                          <span className="text-green-700 text-sm font-medium">
-                            ✓ Verified & Active
-                          </span>
-                        </div>
-                      )}
+                    {!disaster.isVerified && (
+                      <Button
+                        onClick={() => verifyCampaign(disaster.id)}
+                        variant="default"
+                        size="sm"
+                        className="w-full bg-blue-600 hover:bg-blue-700"
+                      >
+                        ✓ Verify Campaign
+                      </Button>
+                    )}
                   </div>
                 </DisasterCard>
               ))}

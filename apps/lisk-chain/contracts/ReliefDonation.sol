@@ -30,6 +30,7 @@ contract ReliefDonation is AccessControl, ReentrancyGuard, Pausable {
         uint256 endTime;
         bool isVerified;
         bool isActive;
+        bool isDeleted;
         string ipfsMetadata; // IPFS hash for detailed info
     }
 
@@ -79,6 +80,7 @@ contract ReliefDonation is AccessControl, ReentrancyGuard, Pausable {
     event CampaignCreated(uint256 indexed campaignId, string name, address indexed ngo);
     event CampaignVerified(uint256 indexed campaignId, address indexed verifier);
     event CampaignUpdated(uint256 indexed campaignId, string name, address indexed ngo);
+    event CampaignDeleted(uint256 indexed campaignId);
     event DonationReceived(uint256 indexed campaignId, address indexed donor, uint256 amount);
     event FundsDisbursed(uint256 indexed disbursementId, uint256 campaignId, uint256 amount, string purpose);
     event DisbursementVerified(uint256 indexed disbursementId, address indexed verifier);
@@ -122,10 +124,15 @@ contract ReliefDonation is AccessControl, ReentrancyGuard, Pausable {
     }
     // Only admin or owner can delete
     function deleteCampaign(uint256 _id) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(campaigns[_id].exists, "Campaign does not exist");
-        delete campaigns[_id];
+        Campaign storage campaign = campaigns[_id];
+        require(campaign.id != 0, "Campaign does not exist");
+        require(!campaign.isDeleted, "Campaign already deleted");
+
+        campaign.isDeleted = true;
+        campaign.isActive = false; // optional
         emit CampaignDeleted(_id);
     }
+
 
     /**
      * @dev Update an existing campaign

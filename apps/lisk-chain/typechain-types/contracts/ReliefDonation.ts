@@ -60,6 +60,7 @@ export interface ReliefDonationInterface extends Interface {
       | "campaignMilestones"
       | "campaigns"
       | "createCampaign"
+      | "deleteCampaign"
       | "disburseFunds"
       | "disbursementCounter"
       | "disbursements"
@@ -91,6 +92,7 @@ export interface ReliefDonationInterface extends Interface {
   getEvent(
     nameOrSignatureOrTopic:
       | "CampaignCreated"
+      | "CampaignDeleted"
       | "CampaignUpdated"
       | "CampaignVerified"
       | "DisbursementVerified"
@@ -140,6 +142,10 @@ export interface ReliefDonationInterface extends Interface {
   encodeFunctionData(
     functionFragment: "createCampaign",
     values: [string, string, BigNumberish, BigNumberish, string, BigNumberish[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "deleteCampaign",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "disburseFunds",
@@ -277,6 +283,10 @@ export interface ReliefDonationInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "deleteCampaign",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "disburseFunds",
     data: BytesLike
   ): Result;
@@ -369,6 +379,18 @@ export namespace CampaignCreatedEvent {
     campaignId: bigint;
     name: string;
     ngo: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace CampaignDeletedEvent {
+  export type InputTuple = [campaignId: BigNumberish];
+  export type OutputTuple = [campaignId: bigint];
+  export interface OutputObject {
+    campaignId: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -656,6 +678,7 @@ export interface ReliefDonation extends BaseContract {
         bigint,
         boolean,
         boolean,
+        boolean,
         string
       ] & {
         id: bigint;
@@ -669,6 +692,7 @@ export interface ReliefDonation extends BaseContract {
         endTime: bigint;
         isVerified: boolean;
         isActive: boolean;
+        isDeleted: boolean;
         ipfsMetadata: string;
       }
     ],
@@ -684,6 +708,12 @@ export interface ReliefDonation extends BaseContract {
       _ipfsMetadata: string,
       _milestones: BigNumberish[]
     ],
+    [void],
+    "nonpayable"
+  >;
+
+  deleteCampaign: TypedContractMethod<
+    [_id: BigNumberish],
     [void],
     "nonpayable"
   >;
@@ -909,6 +939,7 @@ export interface ReliefDonation extends BaseContract {
         bigint,
         boolean,
         boolean,
+        boolean,
         string
       ] & {
         id: bigint;
@@ -922,6 +953,7 @@ export interface ReliefDonation extends BaseContract {
         endTime: bigint;
         isVerified: boolean;
         isActive: boolean;
+        isDeleted: boolean;
         ipfsMetadata: string;
       }
     ],
@@ -941,6 +973,9 @@ export interface ReliefDonation extends BaseContract {
     [void],
     "nonpayable"
   >;
+  getFunction(
+    nameOrSignature: "deleteCampaign"
+  ): TypedContractMethod<[_id: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "disburseFunds"
   ): TypedContractMethod<
@@ -1120,6 +1155,13 @@ export interface ReliefDonation extends BaseContract {
     CampaignCreatedEvent.OutputObject
   >;
   getEvent(
+    key: "CampaignDeleted"
+  ): TypedContractEvent<
+    CampaignDeletedEvent.InputTuple,
+    CampaignDeletedEvent.OutputTuple,
+    CampaignDeletedEvent.OutputObject
+  >;
+  getEvent(
     key: "CampaignUpdated"
   ): TypedContractEvent<
     CampaignUpdatedEvent.InputTuple,
@@ -1207,6 +1249,17 @@ export interface ReliefDonation extends BaseContract {
       CampaignCreatedEvent.InputTuple,
       CampaignCreatedEvent.OutputTuple,
       CampaignCreatedEvent.OutputObject
+    >;
+
+    "CampaignDeleted(uint256)": TypedContractEvent<
+      CampaignDeletedEvent.InputTuple,
+      CampaignDeletedEvent.OutputTuple,
+      CampaignDeletedEvent.OutputObject
+    >;
+    CampaignDeleted: TypedContractEvent<
+      CampaignDeletedEvent.InputTuple,
+      CampaignDeletedEvent.OutputTuple,
+      CampaignDeletedEvent.OutputObject
     >;
 
     "CampaignUpdated(uint256,string,address)": TypedContractEvent<
