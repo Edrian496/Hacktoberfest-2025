@@ -1,10 +1,9 @@
 "use client";
 
-import React from 'react'; 
-
+import React from "react";
 
 function BrandSection() {
-  const HEADER_HEIGHT = 80; 
+  const HEADER_HEIGHT = 80;
 
   const scrollToSection = (sectionId: string) => {
     const target = document.getElementById(sectionId);
@@ -24,10 +23,14 @@ function BrandSection() {
   return (
     <div className="flex flex-col items-center lg:items-start">
       <div className="relative mb-4">
-        <div className="relative h-[30px] w-[184px] cursor-pointer" onClick={handleBrandLogoClick}>
-          <p className="absolute font-['Manrope:Bold',_sans-serif] font-bold h-[30px] leading-[28px] left-0 text-[40px] text-gray-100 top-0 w-[184px] whitespace-pre-wrap">
-            {`TrustChain`}
-          </p>
+        <div
+          className="relative h-[30px] w-[184px] cursor-pointer"
+          onClick={handleBrandLogoClick}
+        >
+          <h1 className="absolute font-['Manrope:Bold',_sans-serif] font-bold h-[30px] leading-[28px] left-0 text-[40px] top-0 w-[184px] whitespace-pre-wrap">
+            <span className="text-white text-4xl">Trust</span>
+            <span className="text-[var(--accent)]">Chain</span>
+          </h1>
         </div>
       </div>
 
@@ -53,7 +56,7 @@ function BrandSection() {
 }
 
 function QuickLinks() {
-  const HEADER_HEIGHT = 80; 
+  const HEADER_HEIGHT = 80;
 
   const scrollToSection = (sectionId: string) => {
     const target = document.getElementById(sectionId);
@@ -66,14 +69,17 @@ function QuickLinks() {
   };
 
   const links = [
-    { name: "Home", href: "#home", sectionId: "home" }, 
-    { name: "About", href: "#about", sectionId: "about" }, 
+    { name: "Home", href: "#home", sectionId: "home" },
+    { name: "About", href: "#about", sectionId: "about" },
     { name: "Campaigns", href: "#campaigns", sectionId: "campaigns" },
-    { name: "Partners", href: "#partners", sectionId: "partners" }, 
+    { name: "Partners", href: "#partners", sectionId: "partners" },
   ];
 
-  const handleQuickLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
-    e.preventDefault(); 
+  const handleQuickLinkClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    sectionId: string
+  ) => {
+    e.preventDefault();
     scrollToSection(sectionId);
   };
 
@@ -88,7 +94,7 @@ function QuickLinks() {
           <li key={index}>
             <a
               href={link.href}
-              onClick={(e) => handleQuickLinkClick(e, link.sectionId)} 
+              onClick={(e) => handleQuickLinkClick(e, link.sectionId)}
               className="font-['Nunito:Regular',_sans-serif] font-normal leading-[24px] text-[#d1d5dc] text-[16px] hover:text-white transition-colors cursor-pointer" // Added cursor-pointer
             >
               {link.name}

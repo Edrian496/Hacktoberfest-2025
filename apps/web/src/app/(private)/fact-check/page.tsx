@@ -245,7 +245,7 @@ const getVerdictBadge = (verdict: string, size: 'normal' | 'large' = 'normal') =
             </p>
                     
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-2sm">
                     Submit content for AI-powered fact-checking
                   </CardDescription>
                 </CardHeader>
@@ -305,7 +305,7 @@ const getVerdictBadge = (verdict: string, size: 'normal' | 'large' = 'normal') =
                       </TabsContent>
                     </Tabs>
 
-                    <div className="min-h-[25px] flex items-center justify-center">
+                    <div className="min-h-[10px] flex items-center justify-center">
                       {(validationError || error) && (
                         <Alert variant="destructive" className="w-full">
                           <AlertCircle className="h-4 w-4" />
@@ -390,20 +390,20 @@ const getVerdictBadge = (verdict: string, size: 'normal' | 'large' = 'normal') =
 
               <Card className="shadow-xl border-0">
                 <CardHeader className="border-b">
-                  <CardTitle className="">
+                  <CardTitle className="text-[23px] text-[var(--secondary)] ">
                     Recent Submissions</CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-2sm">
                     View history of fact-checked content
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="pt-6">
+                <CardContent className="pt-2">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="font-semibold">Content</TableHead>
-                        <TableHead className="font-semibold">Source</TableHead>
-                        <TableHead className="font-semibold">Verdict</TableHead>
-                        <TableHead className="font-semibold">Date</TableHead>
+                        <TableHead className="font-semibold text-lg">Content</TableHead>
+                        <TableHead className="font-semibold text-lg">Source</TableHead>
+                        <TableHead className="font-semibold text-lg">Verdict</TableHead>
+                        <TableHead className="font-semibold text-lg">Date</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -414,17 +414,17 @@ const getVerdictBadge = (verdict: string, size: 'normal' | 'large' = 'normal') =
                           onClick={() => handleRowClick(submission)}
                         >
                           <TableCell className="max-w-xs">
-                            <div className="line-clamp-2 text-sm">
+                            <div className="line-clamp-2 text-3sm">
                               {submission.content}
                             </div>
                           </TableCell>
-                          <TableCell className="text-sm text-gray-600">
+                          <TableCell className="text-3sm text-gray-600">
                             {submission.source}
                           </TableCell>
                           <TableCell>
                             {getVerdictBadge(submission.verdict)}
                           </TableCell>
-                          <TableCell className="text-sm text-gray-600">
+                          <TableCell className="text-3sm text-gray-600">
                             {submission.date}
                           </TableCell>
                         </TableRow>
@@ -435,12 +435,13 @@ const getVerdictBadge = (verdict: string, size: 'normal' | 'large' = 'normal') =
               </Card>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-2">
               <Card className="shadow-xl border-0">
                 <CardHeader className="border-b">
-                  <CardTitle>Statistics</CardTitle>
+                  <CardTitle className="text-[23px] text-[var(--secondary)] mb-1">
+                    Statistics</CardTitle>
                 </CardHeader>
-                <CardContent className="pt-6 space-y-4">
+                <CardContent className="pt-1 space-y-4">
                   <div className="flex items-center justify-between p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
                     <div>
                       <p className="text-sm text-gray-600 font-medium">

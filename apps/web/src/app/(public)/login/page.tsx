@@ -88,29 +88,37 @@ export default function LoginRegisterPage() {
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle>Welcome to TrustChain</CardTitle>
-          <CardDescription>
+          <img
+        src="./imports/emblem.png" 
+        alt="TrustChain Emblem" 
+        className="pl-30 -mb-10"
+      />
+          <CardTitle className="text-3xl text-blue-900">
+            Welcome to
+            <span className="text-blue-900 font-bold text-3xl"> Trust</span>
+            <span className="text-[#FACC15] font-bold">Chain</span>
+          </CardTitle>
+          <CardDescription className="text-[14px]">
             Login or create an account to start helping
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="login" className="w-full">
+          <Tabs defaultValue="login" className="w-full text-[16px]">
             <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger 
+              <TabsTrigger
                 value="login"
-                className="data-[state=active]:bg-[#FACC15]/60"
+                className="data-[state=active]:bg-[#FACC15]/60 text-[var(--secondary)]"
               >
                 Login
               </TabsTrigger>
-              <TabsTrigger 
+              <TabsTrigger
                 value="register"
-                className="data-[state=active]:bg-[#FACC15]/60"
+                className="data-[state=active]:bg-[#FACC15]/60 text-[var(--secondary)"
               >
                 Register
               </TabsTrigger>
             </TabsList>
 
-            {/* Login */}
             <TabsContent value="login">
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
@@ -154,7 +162,6 @@ export default function LoginRegisterPage() {
 
               {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 
-              {/* Divider */}
               <div className="mt-6">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
@@ -177,7 +184,6 @@ export default function LoginRegisterPage() {
               </div>
             </TabsContent>
 
-            {/* Register */}
             <TabsContent value="register">
               <form onSubmit={handleRegister} className="space-y-4">
                 <div className="space-y-2">
@@ -236,7 +242,6 @@ export default function LoginRegisterPage() {
 
               {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 
-              {/* Divider */}
               <div className="mt-6">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">

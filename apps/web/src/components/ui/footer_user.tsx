@@ -1,10 +1,8 @@
 "use client";
 
-import React from 'react';
-import { useRouter } from 'next/navigation';
-import { useUser } from '@/lib/useUser';
-
-
+import React from "react";
+import { useRouter } from "next/navigation";
+import { useUser } from "@/lib/useUser";
 
 function BrandSection({ isAuthenticated }: { isAuthenticated: boolean }) {
   const router = useRouter();
@@ -24,7 +22,7 @@ function BrandSection({ isAuthenticated }: { isAuthenticated: boolean }) {
   const handleBrandLogoClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (isAuthenticated) {
-      router.push('/dashboard');
+      router.push("/dashboard");
     } else {
       // Check if we're on a page with sections or need to navigate home first
       const homeSection = document.getElementById("home");
@@ -33,7 +31,7 @@ function BrandSection({ isAuthenticated }: { isAuthenticated: boolean }) {
         scrollToSection("home");
       } else {
         // Navigate to home page first
-        router.push('/');
+        router.push("/");
       }
     }
   };
@@ -41,10 +39,14 @@ function BrandSection({ isAuthenticated }: { isAuthenticated: boolean }) {
   return (
     <div className="flex flex-col items-center lg:items-start">
       <div className="relative mb-4">
-        <div className="relative h-[30px] w-[184px] cursor-pointer" onClick={handleBrandLogoClick}>
-          <p className="absolute font-['Manrope:Bold',_sans-serif] font-bold h-[30px] leading-[28px] left-0 text-[40px] text-gray-100 top-0 w-[184px] whitespace-pre-wrap">
-            {`TrustChain`}
-          </p>
+        <div
+          className="relative h-[30px] w-[184px] cursor-pointer"
+          onClick={handleBrandLogoClick}
+        >
+          <h1 className="absolute font-['Manrope:Bold',_sans-serif] font-bold h-[30px] leading-[28px] left-0 text-[40px] top-0 w-[184px] whitespace-pre-wrap">
+            <span className="text-white text-4xl">Trust</span>
+            <span className="text-[var(--accent)]">Chain</span>
+          </h1>
         </div>
       </div>
 
@@ -78,7 +80,7 @@ function QuickLinks({ isAuthenticated }: { isAuthenticated: boolean }) {
       // Always scroll smoothly, even if already on the page
       const targetPosition = target.offsetTop - HEADER_HEIGHT;
       const currentPosition = window.pageYOffset;
-      
+
       // Calculate if we need to scroll
       if (Math.abs(targetPosition - currentPosition) > 5) {
         window.scrollTo({
@@ -112,9 +114,12 @@ function QuickLinks({ isAuthenticated }: { isAuthenticated: boolean }) {
 
   const links = isAuthenticated ? authenticatedLinks : guestLinks;
 
-  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, link: any) => {
+  const handleLinkClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    link: any
+  ) => {
     e.preventDefault();
-    
+
     if (isAuthenticated && link.route) {
       // For authenticated users, navigate to routes
       router.push(link.route);

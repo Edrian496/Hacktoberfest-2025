@@ -410,3 +410,17 @@ html {
     linear-gradient(to bottom, rgba(0, 167, 238, 0.1) 1px, transparent 1px);
   background-size: 40px 40px;
 }
+
+
+@keyframes spin-once { 
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-rotate-once {
+  animation: spin-once 2s ease-out forwards; /* 2s duration, ease-out for a smooth stop, forwards to stay at the end state */
+}
