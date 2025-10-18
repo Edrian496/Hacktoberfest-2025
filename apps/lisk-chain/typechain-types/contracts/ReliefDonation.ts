@@ -82,6 +82,7 @@ export interface ReliefDonationInterface extends Interface {
       | "revokeRole"
       | "supportsInterface"
       | "unpause"
+      | "updateCampaign"
       | "verifyCampaign"
       | "verifyDisbursement"
       | "verifyReceipt"
@@ -90,6 +91,7 @@ export interface ReliefDonationInterface extends Interface {
   getEvent(
     nameOrSignatureOrTopic:
       | "CampaignCreated"
+      | "CampaignUpdated"
       | "CampaignVerified"
       | "DisbursementVerified"
       | "DonationReceived"
@@ -219,6 +221,18 @@ export interface ReliefDonationInterface extends Interface {
   ): string;
   encodeFunctionData(functionFragment: "unpause", values?: undefined): string;
   encodeFunctionData(
+    functionFragment: "updateCampaign",
+    values: [
+      BigNumberish,
+      string,
+      string,
+      BigNumberish,
+      BigNumberish,
+      string,
+      BigNumberish[]
+    ]
+  ): string;
+  encodeFunctionData(
     functionFragment: "verifyCampaign",
     values: [BigNumberish]
   ): string;
@@ -327,6 +341,10 @@ export interface ReliefDonationInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "unpause", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "updateCampaign",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "verifyCampaign",
     data: BytesLike
   ): Result;
@@ -341,6 +359,24 @@ export interface ReliefDonationInterface extends Interface {
 }
 
 export namespace CampaignCreatedEvent {
+  export type InputTuple = [
+    campaignId: BigNumberish,
+    name: string,
+    ngo: AddressLike
+  ];
+  export type OutputTuple = [campaignId: bigint, name: string, ngo: string];
+  export interface OutputObject {
+    campaignId: bigint;
+    name: string;
+    ngo: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace CampaignUpdatedEvent {
   export type InputTuple = [
     campaignId: BigNumberish,
     name: string,
@@ -788,6 +824,20 @@ export interface ReliefDonation extends BaseContract {
 
   unpause: TypedContractMethod<[], [void], "nonpayable">;
 
+  updateCampaign: TypedContractMethod<
+    [
+      _id: BigNumberish,
+      _name: string,
+      _description: string,
+      _targetAmount: BigNumberish,
+      _duration: BigNumberish,
+      _ipfsMetadata: string,
+      _milestones: BigNumberish[]
+    ],
+    [void],
+    "nonpayable"
+  >;
+
   verifyCampaign: TypedContractMethod<
     [_campaignId: BigNumberish],
     [void],
@@ -1034,6 +1084,21 @@ export interface ReliefDonation extends BaseContract {
     nameOrSignature: "unpause"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "updateCampaign"
+  ): TypedContractMethod<
+    [
+      _id: BigNumberish,
+      _name: string,
+      _description: string,
+      _targetAmount: BigNumberish,
+      _duration: BigNumberish,
+      _ipfsMetadata: string,
+      _milestones: BigNumberish[]
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "verifyCampaign"
   ): TypedContractMethod<[_campaignId: BigNumberish], [void], "nonpayable">;
   getFunction(
@@ -1053,6 +1118,13 @@ export interface ReliefDonation extends BaseContract {
     CampaignCreatedEvent.InputTuple,
     CampaignCreatedEvent.OutputTuple,
     CampaignCreatedEvent.OutputObject
+  >;
+  getEvent(
+    key: "CampaignUpdated"
+  ): TypedContractEvent<
+    CampaignUpdatedEvent.InputTuple,
+    CampaignUpdatedEvent.OutputTuple,
+    CampaignUpdatedEvent.OutputObject
   >;
   getEvent(
     key: "CampaignVerified"
@@ -1135,6 +1207,17 @@ export interface ReliefDonation extends BaseContract {
       CampaignCreatedEvent.InputTuple,
       CampaignCreatedEvent.OutputTuple,
       CampaignCreatedEvent.OutputObject
+    >;
+
+    "CampaignUpdated(uint256,string,address)": TypedContractEvent<
+      CampaignUpdatedEvent.InputTuple,
+      CampaignUpdatedEvent.OutputTuple,
+      CampaignUpdatedEvent.OutputObject
+    >;
+    CampaignUpdated: TypedContractEvent<
+      CampaignUpdatedEvent.InputTuple,
+      CampaignUpdatedEvent.OutputTuple,
+      CampaignUpdatedEvent.OutputObject
     >;
 
     "CampaignVerified(uint256,address)": TypedContractEvent<
