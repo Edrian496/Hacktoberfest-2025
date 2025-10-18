@@ -4,19 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/lib/useUser';
 
-function Group8() {
-  return (
-    <div className="relative ml-2 mt-2">
-      <div className="relative w-[67px] h-[67px]">
-        <img
-          alt=""
-          className="absolute inset-0.5 w-full h-full object-cover -translate-y-[45px]"
-          src="./imports/emblem_small.png"
-        />
-      </div>
-    </div>
-  );
-}
+
 
 function BrandSection({ isAuthenticated }: { isAuthenticated: boolean }) {
   const router = useRouter();
@@ -55,11 +43,8 @@ function BrandSection({ isAuthenticated }: { isAuthenticated: boolean }) {
       <div className="relative mb-4">
         <div className="relative h-[30px] w-[184px] cursor-pointer" onClick={handleBrandLogoClick}>
           <p className="absolute font-['Manrope:Bold',_sans-serif] font-bold h-[30px] leading-[28px] left-0 text-[40px] text-gray-100 top-0 w-[184px] whitespace-pre-wrap">
-            {`B   NGON`}
+            {`TrustChain`}
           </p>
-          <div className="absolute left-[2px] top-[18px]">
-            <Group8 />
-          </div>
         </div>
       </div>
 
@@ -170,7 +155,7 @@ function QuickLinks({ isAuthenticated }: { isAuthenticated: boolean }) {
 
 function ContactInfo() {
   const contactItems = [
-    { label: "support@bangon.org", type: "email" },
+    { label: "support@trustchain.org", type: "email" },
     { label: "+1 (555) 123-4567", type: "phone" },
   ];
 
@@ -215,7 +200,7 @@ export function Footer() {
 
         <div className="border-t border-gray-100 pt-8">
           <p className="font-['Nunito:Regular',_sans-serif] font-normal leading-[20px] text-[#d1d5dc] text-[14px] text-center">
-            © 2025 Bangon. All rights reserved.
+            © 2025 TrustChain. All rights reserved.
           </p>
         </div>
       </div>

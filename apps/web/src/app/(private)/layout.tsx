@@ -5,6 +5,21 @@ import { useRouter, usePathname } from "next/navigation";
 import { useUser } from "@/lib/useUser";
 import { Navigation } from "@/components/ui/navigation";
 import { Footer } from '../../components/ui/footer_user';
+import "../../styles/globals.css";
+import { Manrope, Nunito } from 'next/font/google';
+
+const manrope = Manrope({
+  subsets: ['latin'],
+  display: 'swap', 
+  variable: '--font-manrope', 
+});
+
+const nunito = Nunito({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-nunito', 
+});
+
 
 export default function PrivateLayout({
   children,
@@ -57,6 +72,9 @@ export default function PrivateLayout({
 
       <div className="flex flex-1">
         <main className="flex-1 p-6">{children}</main>
+        <body
+        className={`${manrope.variable} ${nunito.variable} antialiased`}
+      ></body>
       </div>
 
       <Footer />

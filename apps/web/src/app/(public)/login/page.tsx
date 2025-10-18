@@ -88,7 +88,7 @@ export default function LoginRegisterPage() {
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle>Welcome to BANGON</CardTitle>
+          <CardTitle>Welcome to TrustChain</CardTitle>
           <CardDescription>
             Login or create an account to start helping
           </CardDescription>

@@ -5,8 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import axios from "axios";
-
 import {
   Card,
   CardContent,
@@ -24,40 +22,55 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   CheckCircle,
   XCircle,
   AlertTriangle,
   Sparkles,
-  Eye,
+  AlertCircle,
+  X,
 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
-interface FactCheckAdminProps {
-  onNavigate: (page: string) => void;
-  currentPage: string;
+interface FactCheckResult {
+  verdict: string;
+  confidence: number;
+  explanation: string;
+  related_article?: {
+    title: string;
+    url: string;
+  };
 }
 
-export default function FactCheckAdmin({
-  onNavigate,
-  currentPage,
-}: FactCheckAdminProps) {
+interface Submission {
+  id: string;
+  content: string;
+  source: string;
+  verdict: string;
+  confidence: number;
+  date: string;
+}
+
+export default function FactCheckAdmin() {
   const [inputType, setInputType] = useState<"text" | "url">("text");
   const [textInput, setTextInput] = useState("");
   const [urlInput, setUrlInput] = useState("");
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<FactCheckResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
-  const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
+  const [error, setError] = useState<string>("");
+  const [validationError, setValidationError] = useState<string>("");
+  const [selectedSubmission, setSelectedSubmission] =
+    useState<Submission | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const [submissions] = useState([
+  const submissions: Submission[] = [
     {
       id: "1",
       content:
@@ -65,7 +78,6 @@ export default function FactCheckAdmin({
       source: "User Submission",
       verdict: "true",
       confidence: 92,
-      status: "Approved",
       date: "Oct 4, 2025",
     },
     {
@@ -75,7 +87,6 @@ export default function FactCheckAdmin({
       source: "News URL",
       verdict: "false",
       confidence: 88,
-      status: "Approved",
       date: "Oct 3, 2025",
     },
     {
@@ -84,7 +95,6 @@ export default function FactCheckAdmin({
       source: "Social Media",
       verdict: "misleading",
       confidence: 75,
-      status: "Pending Review",
       date: "Oct 3, 2025",
     },
     {
@@ -94,155 +104,177 @@ export default function FactCheckAdmin({
       source: "News Article",
       verdict: "true",
       confidence: 95,
-      status: "Approved",
       date: "Oct 2, 2025",
     },
-  ]);
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    setError("");
+    setValidationError("");
+    setResult(null);
+
     if (inputType === "text") {
       if (!textInput || textInput.trim() === "") {
-        alert("Please enter text to fact-check");
+        setValidationError("Please enter text to fact-check");
         return;
       }
     } else {
       if (!urlInput || urlInput.trim() === "") {
-        alert("Please enter a URL to fact-check");
+        setValidationError("Please enter a URL to fact-check");
         return;
       }
     }
-    
-    setIsLoading(true);
-    
-    try {
-      const payload = inputType === "text" 
-        ? { text: textInput.trim() }
-        : { url: urlInput.trim() };
 
-      console.log("Sending payload:", payload); 
-      
-      const response = await axios.post("http://localhost:8000/fact-check", payload);
-      
-      setResult({
-        verdict: response.data.verdict,
-        confidence: response.data.confidence,
-        explanation: response.data.explanation,
-        related_article: response.data.related_article,
+    setIsLoading(true);
+
+    try {
+      const payload =
+        inputType === "text"
+          ? { text: textInput.trim() }
+          : { url: urlInput.trim() };
+
+      console.log("Sending payload:", payload);
+
+      const response = await fetch("http://localhost:8000/fact-check", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
       });
-      
-    } catch (error) {
-      console.error("Full error:", error);
-      if (axios.isAxiosError(error)) {
-        const detail = error.response?.data?.detail;
-        console.error("Response data:", error.response?.data);
-        console.error("Detail array:", detail);
-        
-        if (Array.isArray(detail)) {
-          detail.forEach((err, index) => {
-            console.error(`Error ${index}:`, {
-              location: err.loc,
-              message: err.msg,
-              type: err.type,
-              input: err.input
-            });
-          });
-        }
-          
-        const errorDetail = error.response?.data?.detail;
-        if (Array.isArray(errorDetail)) {
-          const errorMessages = errorDetail.map((err: any) => 
-            `Field: ${err.loc?.join('.')}, Error: ${err.msg}, Type: ${err.type}`
-          ).join('\n');
-          alert(`Validation Error:\n\n${errorMessages}`);
+
+      const data: any = await response.json();
+
+      if (!response.ok) {
+        if (Array.isArray(data.detail)) {
+          const errorMessages = data.detail
+            .map((err: any) => `${err.msg} (${err.loc?.join(".")})`)
+            .join(", ");
+          setError(`Validation Error: ${errorMessages}`);
+        } else if (typeof data.detail === "string") {
+          setError(data.detail);
         } else {
-          alert(`Error: ${JSON.stringify(error.response?.data)}`);
+          setError(
+            data.message || "An error occurred while processing your request"
+          );
         }
-      } else {
-        alert("Network error - make sure backend is running on port 8000");
+        return;
       }
+
+      setResult({
+        verdict: data.verdict,
+        confidence: data.confidence,
+        explanation: data.explanation,
+        related_article: data.related_article,
+      });
+    } catch (err) {
+      console.error("Full error:", err);
+      setError(
+        "Network error - please make sure the backend is running on port 8000"
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleReview = (submission: any) => {
-    setSelectedSubmission(submission);
-    setIsReviewDialogOpen(true);
-  };
+ // Find this function in your component and modify it:
+const getVerdictBadge = (verdict: string, size: 'normal' | 'large' = 'normal') => {
+  const baseClasses = "rounded-full font-semibold px-3 py-1 text-xs inline-flex items-center";
+  const largeClasses = "px-4 py-2 text-base"; // New classes for larger badge
+  const iconBaseClasses = "w-3 h-3 mr-1";
+  const iconLargeClasses = "w-4 h-4 mr-2"; // New classes for larger icon
 
-  const getVerdictBadge = (verdict: string) => {
-    switch (verdict) {
-      case "true":
-        return (
-          <Badge className="bg-secondary/20 text-secondary-foreground border-secondary">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            True
-          </Badge>
-        );
-      case "false":
-        return (
-          <Badge variant="destructive">
-            <XCircle className="w-3 h-3 mr-1" />
-            False
-          </Badge>
-        );
-      case "misleading":
-        return (
-          <Badge className="bg-warning/20 text-warning-foreground border-warning">
-            <AlertTriangle className="w-3 h-3 mr-1" />
-            Misleading
-          </Badge>
-        );
-      default:
-        return null;
-    }
+  const currentBadgeClasses = size === 'large' ? largeClasses : baseClasses;
+  const currentIconClasses = size === 'large' ? iconLargeClasses : iconBaseClasses;
+
+  switch (verdict) {
+    case "true":
+      return (
+        <Badge className={`bg-green-100 text-green-800 border-green-300 hover:bg-green-100 ${currentBadgeClasses}`}>
+          <CheckCircle className={currentIconClasses} />
+          True
+        </Badge>
+      );
+    case "false":
+      return (
+        <Badge className={`bg-red-100 text-red-800 border-red-300 hover:bg-red-100 ${currentBadgeClasses}`}>
+          <XCircle className={currentIconClasses} />
+          False
+        </Badge>
+      );
+    case "misleading":
+      return (
+        <Badge className={`bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-100 ${currentBadgeClasses}`}>
+          <AlertTriangle className={currentIconClasses} />
+          Misleading
+        </Badge>
+      );
+    default:
+      return null;
+  }
+};
+
+  const handleRowClick = (submission: Submission) => {
+    setSelectedSubmission(submission);
+    setIsDialogOpen(true);
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <main className="flex-1 p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
-            <h1 className="mb-2 font-bold">Fact-Check Management</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-4xl font-bold mb-2 h-12 bg-gradient-to-r from-[var(--secondary)] to-blue-500 bg-clip-text text-transparent">
+              Fact Check
+            </h1>
+            <p className="text-muted-foreground text-lg">
               Review and verify disaster-related information submissions
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Verify New Content</CardTitle>
+              <Card className="shadow-xl border-0">
+                <CardHeader className="border-b">
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-[var(--primary)] " />
+                    <p className=" text-[23px] text-[var(--primary)]">
+              Verify New Content
+            </p>
+                    
+                  </CardTitle>
                   <CardDescription>
                     Submit content for AI-powered fact-checking
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                <CardContent className="pt-1">
+                  <div className="space-y-3 relative">
                     <Tabs
                       value={inputType}
-                      onValueChange={(v) => setInputType(v as "text" | "url")}
+                      onValueChange={(v) => setInputType(v)}
                     >
-                      <TabsList className="grid w-full grid-cols-2 mb-6">
-                        <TabsTrigger 
+                      <TabsList className="grid w-full grid-cols-2 mb-6 bg-gray-100">
+                        <TabsTrigger
                           value="text"
-                          className="data-[state=active]:bg-[#FACC15]/60 data-[state=active]"
+                          className="data-[state=active]:bg-[#F4D96D] data-[state=active]:shadow-sm"
                         >
                           Text Input
                         </TabsTrigger>
-                        <TabsTrigger 
+                        <TabsTrigger
                           value="url"
-                          className="data-[state=active]:bg-[#FACC15]/60 data-[state=active]"
+                          className="data-[state=active]:bg-[#F4D96D] data-[state=active]:shadow-sm"
                         >
                           URL
                         </TabsTrigger>
                       </TabsList>
 
                       <TabsContent value="text" className="space-y-4">
-                        <Label htmlFor="admin-text-input">
+                        <Label
+                          htmlFor="admin-text-input"
+                          className="text-base font-semibold"
+                        >
                           Content to Verify
                         </Label>
                         <Textarea
@@ -251,26 +283,54 @@ export default function FactCheckAdmin({
                           value={textInput}
                           onChange={(e) => setTextInput(e.target.value)}
                           rows={6}
-                          required={inputType === "text"}
+                          className="resize-none focus:ring-2 border-1 border-gray-300 focus:ring-blue-500"
                         />
                       </TabsContent>
 
-                      <TabsContent value="url" className="space-y-4 mb-7" >
-                        <Label htmlFor="admin-url-input">Article URL</Label>
+                      <TabsContent value="url" className="space-y-4 mb-7">
+                        <Label
+                          htmlFor="admin-url-input"
+                          className="text-base font-semibold"
+                        >
+                          Article URL
+                        </Label>
                         <Input
                           id="admin-url-input"
                           type="url"
                           placeholder="https://example.com/article"
                           value={urlInput}
                           onChange={(e) => setUrlInput(e.target.value)}
-                          required={inputType === "url"}
+                          className="focus:ring-2 border-1 border-gray-300  focus:ring-blue-500"
                         />
                       </TabsContent>
                     </Tabs>
 
+                    <div className="min-h-[25px] flex items-center justify-center">
+                      {(validationError || error) && (
+                        <Alert variant="destructive" className="w-full">
+                          <AlertCircle className="h-4 w-4" />
+                          <AlertTitle>
+                            {validationError ? "Validation Error" : "Error"}
+                          </AlertTitle>
+                          <AlertDescription className="pr-8">
+                            {validationError || error}
+                          </AlertDescription>
+                          <button
+                            onClick={() => {
+                              setError("");
+                              setValidationError("");
+                            }}
+                            className="absolute top-3 right-3 hover:bg-red-100 rounded p-1 transition-colors"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </Alert>
+                      )}
+                    </div>
+
                     <Button
-                      type="submit"
-                      className="w-full bg-primary hover:bg-primary/90"
+                      onClick={handleSubmit}
+                      className="w-full bg-[#00A7EE] hover:bg-[#0092D1] text-white font-semibold py-6 shadow-md"
                       disabled={isLoading}
                     >
                       {isLoading ? (
@@ -285,98 +345,87 @@ export default function FactCheckAdmin({
                         </>
                       )}
                     </Button>
-                  </form>
+                  </div>
 
                   {result && (
-                    <div className="mt-6 space-y-4 p-4 border rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <h4>AI Analysis Result</h4>
+                    <div className="mt-6 space-y-3 p-6 border-2 rounded-lg bg-gradient-to-br from-white to-gray-50 shadow-sm">
+                      <div className="flex items-center justify-between pb-3 border-b">
+                        <h4 className="text-lg font-semibold">
+                          AI Analysis Result
+                        </h4>
                         {getVerdictBadge(result.verdict)}
                       </div>
-                      <p className="text-sm text-muted-foreground mb-1">
-                        Confidence: {result.confidence}%
-                      </p>
-                      <p className="text-sm">{result.explanation}</p>
 
-                      {result.related_article && result.related_article.url && (
-                        <div className="mt-2 p-2 border-l-4 border-blue-400 bg-blue-50 rounded">
-                          <p className="text-sm font-semibold">Related Article:</p>
-                          <a
-                            href={result.related_article.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 underline"
-                          >
-                            {result.related_article.title}
-                          </a>
+                      <div className="space-y-3">
+                        <div className="pt-1">
+                          <p className="text-sm font-medium text-gray-600 mb-2">
+                            Explanation:
+                          </p>
+                          <p className="text-sm leading-relaxed text-gray-800">
+                            {result.explanation}
+                          </p>
                         </div>
-                      )}
 
-                      <div className="flex gap-2 mt-2">
-                        <Button className="flex-1 bg-secondary hover:bg-secondary/90">
-                          Approve & Publish
-                        </Button>
-                        <Button variant="outline" className="flex-1">
-                          Edit Result
-                        </Button>
+                        {result.related_article &&
+                          result.related_article.url && (
+                            <div className="mt-3 p-4 border-l-4 border-blue-500 bg-blue-50 rounded-r-lg">
+                              <p className="text-sm font-semibold text-blue-900 mb-2">
+                                Related Article:
+                              </p>
+                              <a
+                                href={result.related_article.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-700 hover:text-blue-900 underline font-medium text-sm"
+                              >
+                                {result.related_article.title}
+                              </a>
+                            </div>
+                          )}
                       </div>
                     </div>
                   )}
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>All Submissions</CardTitle>
+              <Card className="shadow-xl border-0">
+                <CardHeader className="border-b">
+                  <CardTitle className="">
+                    Recent Submissions</CardTitle>
+                  <CardDescription>
+                    View history of fact-checked content
+                  </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Content</TableHead>
-                        <TableHead>Source</TableHead>
-                        <TableHead>Verdict</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead className="font-semibold">Content</TableHead>
+                        <TableHead className="font-semibold">Source</TableHead>
+                        <TableHead className="font-semibold">Verdict</TableHead>
+                        <TableHead className="font-semibold">Date</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {submissions.map((submission) => (
-                        <TableRow key={submission.id}>
+                        <TableRow
+                          key={submission.id}
+                          className="hover:bg-gray-50 cursor-pointer"
+                          onClick={() => handleRowClick(submission)}
+                        >
                           <TableCell className="max-w-xs">
                             <div className="line-clamp-2 text-sm">
                               {submission.content}
                             </div>
                           </TableCell>
-                          <TableCell className="text-sm">
+                          <TableCell className="text-sm text-gray-600">
                             {submission.source}
                           </TableCell>
                           <TableCell>
                             {getVerdictBadge(submission.verdict)}
                           </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={
-                                submission.status === "Approved"
-                                  ? "secondary"
-                                  : "outline"
-                              }
-                            >
-                              {submission.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-sm">
+                          <TableCell className="text-sm text-gray-600">
                             {submission.date}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleReview(submission)}
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -387,61 +436,72 @@ export default function FactCheckAdmin({
             </div>
 
             <div className="space-y-6">
-              <Card>
-                <CardHeader>
+              <Card className="shadow-xl border-0">
+                <CardHeader className="border-b">
                   <CardTitle>Statistics</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      Total Submissions
-                    </p>
-                    <p className="text-2xl">{submissions.length}</p>
+                <CardContent className="pt-6 space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+                    <div>
+                      <p className="text-sm text-gray-600 font-medium">
+                        Total Submissions
+                      </p>
+                      <p className="text-3xl font-bold text-blue-900 mt-1">
+                        {submissions.length}
+                      </p>
+                    </div>
+                    <div className="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
+                      <Sparkles className="w-6 h-6 text-blue-700" />
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      Verified True
-                    </p>
-                    <p className="text-2xl text-secondary">
-                      {submissions.filter((s) => s.verdict === "true").length}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      Flagged False
-                    </p>
-                    <p className="text-2xl text-destructive">
-                      {submissions.filter((s) => s.verdict === "false").length}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      Pending Review
-                    </p>
-                    <p className="text-2xl text-warning">
-                      {
-                        submissions.filter((s) => s.status === "Pending Review")
-                          .length
-                      }
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <Button variant="outline" className="w-full justify-start">
-                    Export Reports
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    View Analytics
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    Settings
-                  </Button>
+                  <div className="flex items-center justify-between p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
+                    <div>
+                      <p className="text-sm text-gray-600 font-medium">
+                        Verified True
+                      </p>
+                      <p className="text-3xl font-bold text-green-700 mt-1">
+                        {submissions.filter((s) => s.verdict === "true").length}
+                      </p>
+                    </div>
+                    <div className="w-12 h-12 bg-green-200 rounded-full flex items-center justify-center">
+                      <CheckCircle className="w-6 h-6 text-green-700" />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-lg">
+                    <div>
+                      <p className="text-sm text-gray-600 font-medium">
+                        Flagged False
+                      </p>
+                      <p className="text-3xl font-bold text-red-700 mt-1">
+                        {
+                          submissions.filter((s) => s.verdict === "false")
+                            .length
+                        }
+                      </p>
+                    </div>
+                    <div className="w-12 h-12 bg-red-200 rounded-full flex items-center justify-center">
+                      <XCircle className="w-6 h-6 text-red-700" />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg">
+                    <div>
+                      <p className="text-sm text-gray-600 font-medium">
+                        Misleading
+                      </p>
+                      <p className="text-3xl font-bold text-amber-700 mt-1">
+                        {
+                          submissions.filter((s) => s.verdict === "misleading")
+                            .length
+                        }
+                      </p>
+                    </div>
+                    <div className="w-12 h-12 bg-amber-200 rounded-full flex items-center justify-center">
+                      <AlertTriangle className="w-6 h-6 text-amber-700" />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -449,52 +509,64 @@ export default function FactCheckAdmin({
         </div>
       </main>
 
-      <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Review Submission</DialogTitle>
-            <DialogDescription>
-              Review and approve or edit the AI fact-check result
-            </DialogDescription>
-          </DialogHeader>
-          {selectedSubmission && (
-            <div className="space-y-4">
-              <div>
-                <Label>Content</Label>
-                <p className="text-sm mt-1">{selectedSubmission.content}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Source</Label>
-                  <p className="text-sm mt-1">{selectedSubmission.source}</p>
-                </div>
-                <div>
-                  <Label>Verdict</Label>
-                  <div className="mt-1">
-                    {getVerdictBadge(selectedSubmission.verdict)}
-                  </div>
-                </div>
-              </div>
-              <div>
-                <Label>Confidence Score</Label>
-                <p className="text-sm mt-1">{selectedSubmission.confidence}%</p>
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsReviewDialogOpen(false)}
-            >
-              Close
-            </Button>
-            <Button variant="outline">Edit</Button>
-            <Button className="bg-secondary hover:bg-secondary/90">
-              Approve
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+  <DialogContent className="max-w-2xl p-6 bg-white rounded-lg shadow-xl">
+    <DialogHeader>
+      <DialogTitle className="text-2xl font-bold text-gray-900">Submission Details</DialogTitle>
+      <DialogDescription className="text-base text-gray-600 mb-4 pb-4 border-b border-gray-200">
+        Complete information about this fact-check submission
+      </DialogDescription>
+    </DialogHeader>
+
+    {selectedSubmission && (
+      <div className="space-y-6">
+
+        {/* Source & Date Box - NOW FIRST */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <Label className="text-lg font-semibold text-gray-800 block mb-2">
+              Source
+            </Label>
+            <p className="text-base text-gray-700">
+              {selectedSubmission.source}
+            </p>
+          </div>
+          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <Label className="text-lg font-semibold text-gray-800 block mb-2">
+              Date
+            </Label>
+            <p className="text-base text-gray-700">
+              {selectedSubmission.date}
+            </p>
+          </div>
+        </div>
+
+        {/* Content Box - NOW SECOND */}
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <Label className="text-lg font-semibold text-gray-800 block mb-2">
+            Content
+          </Label>
+          <p className="text-base text-gray-800 leading-relaxed">
+            {selectedSubmission.content}
+          </p>
+        </div>
+
+        {/* Verdict Box - NOW THIRD - with increased size and gap */}
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <Label className="text-lg font-semibold text-gray-800 block mb-2">
+            Verdict
+          </Label>
+          <div className="mt-2 pl-4"> {/* Added pl-4 for left gap */}
+            {/* The badge itself needs styling for bigger text/padding */}
+            {/* We will modify getVerdictBadge to allow for size variations */}
+            {getVerdictBadge(selectedSubmission.verdict, 'large')}
+          </div>
+        </div>
+
+      </div>
+    )}
+  </DialogContent>
+</Dialog>
     </div>
   );
 }

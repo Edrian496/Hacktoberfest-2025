@@ -3,21 +3,11 @@
 import React from 'react'; 
 import { useRouter } from 'next/navigation';
 
-function Group6() {
-  return (
-    <div className="absolute contents left-[4.5%] top-0">
-      <div className="absolute left-[5.9%] w-[39%] aspect-square top-[-7px]" data-name="bangon 2">
-        <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src="./imports/logo.png" />
-      </div>
-    </div>
-  );
-}
 
 function Group16() {
   return (
     <div className="relative size-full">
-<p className="absolute font-['Manrope:Bold',_sans-serif] font-bold h-[52%] leading-[0.19] left-0 text-[min(19vw,150px)] text-blue-900 top-[51.4%] w-full whitespace-pre-wrap flex items-center justify-center">{`B   NGON`}</p>
-      <Group6 />
+<p className="absolute font-['Manrope:Bold',_sans-serif] font-bold h-[52%] leading-[0.19] left-0 text-[min(18vw,130px)] text-blue-900 top-[51.4%] w-full whitespace-pre-wrap flex items-center justify-center">{`TrustChain`}</p>
     </div>
   );
 }
