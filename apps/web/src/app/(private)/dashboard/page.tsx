@@ -173,7 +173,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="mb-8">
-            <h1 className="mb-2 text-3xl font-bold">Active Disaster Campaigns</h1>
+            <h1 className="mb-2 text-4xl text-[var(--secondary)] font-bold">Active Disaster Campaigns</h1>
             <p className="text-muted-foreground">
               {disasters.length} verified campaign(s) available for donations
             </p>
