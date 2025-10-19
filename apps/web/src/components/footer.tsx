@@ -28,7 +28,7 @@ function BrandSection() {
           onClick={handleBrandLogoClick}
         >
           <h1 className="absolute font-['Manrope:Bold',_sans-serif] font-bold h-[30px] leading-[28px] left-0 text-[40px] top-0 w-[184px] whitespace-pre-wrap">
-            <span className="text-white text-4xl">Trust</span>
+            <span className="text-[var(--primary)] text-4xl">Trust</span>
             <span className="text-[var(--accent)]">Chain</span>
           </h1>
         </div>
@@ -133,23 +133,22 @@ function ContactInfo() {
 
 export function Footer() {
   return (
-    <footer className="bg-blue-900 pt-16 pb-8">
+    <footer className="bg-gradient-to-b from-[#162D71] to-[#1C398E] pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mb-12">
           <div className="lg:col-span-6 text-center lg:text-left flex flex-col items-center lg:items-start">
             <BrandSection />
           </div>
-
-          <div className="lg:col-span-3 text-center lg:text-left flex flex-col items-center lg:items-start">
+          <div className="ml-40 lg:col-span-3 text-center lg:text-left flex flex-col items-center lg:items-start">
             <QuickLinks />
           </div>
 
-          <div className="lg:col-span-3 text-center lg:text-left flex flex-col items-center lg:items-start">
+          <div className="ml-30 lg:col-span-3 text-center lg:text-left flex flex-col items-center lg:items-start">
             <ContactInfo />
           </div>
         </div>
 
-        <div className="border-t border-gray-100 pt-8">
+        <div className="border-t border-gray-100 pt-8 pb-5">
           <p className="font-['Nunito:Regular',_sans-serif] font-normal leading-[20px] text-[#d1d5dc] text-[14px] text-center">
             © 2025 TrustChain. All rights reserved.
           </p>

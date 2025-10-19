@@ -11,7 +11,6 @@ function BrandSection({ isAuthenticated }: { isAuthenticated: boolean }) {
   const scrollToSection = (sectionId: string) => {
     const target = document.getElementById(sectionId);
     if (target) {
-      // Always scroll smoothly
       window.scrollTo({
         top: target.offsetTop - HEADER_HEIGHT,
         behavior: "smooth",
@@ -24,13 +23,10 @@ function BrandSection({ isAuthenticated }: { isAuthenticated: boolean }) {
     if (isAuthenticated) {
       router.push("/dashboard");
     } else {
-      // Check if we're on a page with sections or need to navigate home first
       const homeSection = document.getElementById("home");
       if (homeSection) {
-        // Already on landing page, just scroll
         scrollToSection("home");
       } else {
-        // Navigate to home page first
         router.push("/");
       }
     }
@@ -44,7 +40,7 @@ function BrandSection({ isAuthenticated }: { isAuthenticated: boolean }) {
           onClick={handleBrandLogoClick}
         >
           <h1 className="absolute font-['Manrope:Bold',_sans-serif] font-bold h-[30px] leading-[28px] left-0 text-[40px] top-0 w-[184px] whitespace-pre-wrap">
-            <span className="text-white text-4xl">Trust</span>
+            <span className="text-[var(--primary)] text-4xl">Trust</span>
             <span className="text-[var(--accent)]">Chain</span>
           </h1>
         </div>
@@ -77,18 +73,15 @@ function QuickLinks({ isAuthenticated }: { isAuthenticated: boolean }) {
   const scrollToSection = (sectionId: string) => {
     const target = document.getElementById(sectionId);
     if (target) {
-      // Always scroll smoothly, even if already on the page
       const targetPosition = target.offsetTop - HEADER_HEIGHT;
       const currentPosition = window.pageYOffset;
 
-      // Calculate if we need to scroll
       if (Math.abs(targetPosition - currentPosition) > 5) {
         window.scrollTo({
           top: targetPosition,
           behavior: "smooth",
         });
       } else {
-        // If already very close, still scroll to ensure exact position
         window.scrollTo({
           top: targetPosition,
           behavior: "smooth",
@@ -97,7 +90,6 @@ function QuickLinks({ isAuthenticated }: { isAuthenticated: boolean }) {
     }
   };
 
-  // Different links for authenticated vs guest users
   const guestLinks = [
     { name: "Home", href: "#home", sectionId: "home" },
     { name: "About", href: "#about", sectionId: "about" },
@@ -121,16 +113,12 @@ function QuickLinks({ isAuthenticated }: { isAuthenticated: boolean }) {
     e.preventDefault();
 
     if (isAuthenticated && link.route) {
-      // For authenticated users, navigate to routes
       router.push(link.route);
     } else if (!isAuthenticated && link.sectionId) {
-      // Check if the section exists on current page
       const targetSection = document.getElementById(link.sectionId);
       if (targetSection) {
-        // Section exists, scroll to it smoothly
         scrollToSection(link.sectionId);
       } else {
-        // Section doesn't exist, navigate to home page with hash
         router.push(`/#${link.sectionId}`);
       }
     }
@@ -187,23 +175,23 @@ export function Footer() {
   const isAuthenticated = !!user;
 
   return (
-    <footer className="bg-blue-900 pt-16 pb-8">
+    <footer className="bg-gradient-to-b from-[#162D71] to-[#1C398E] pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mb-12">
           <div className="lg:col-span-6 text-center lg:text-left flex flex-col items-center lg:items-start">
             <BrandSection isAuthenticated={isAuthenticated} />
           </div>
 
-          <div className="lg:col-span-3 text-center lg:text-left flex flex-col items-center lg:items-start">
+          <div className="ml-40 lg:col-span-3 text-center lg:text-left flex flex-col items-center lg:items-start">
             <QuickLinks isAuthenticated={isAuthenticated} />
           </div>
 
-          <div className="lg:col-span-3 text-center lg:text-left flex flex-col items-center lg:items-start">
+          <div className="ml-30 lg:col-span-3 text-center lg:text-left flex flex-col items-center lg:items-start">
             <ContactInfo />
           </div>
         </div>
 
-        <div className="border-t border-gray-100 pt-8">
+        <div className="border-t border-gray-100 pt-8 pb-5">
           <p className="font-['Nunito:Regular',_sans-serif] font-normal leading-[20px] text-[#d1d5dc] text-[14px] text-center">
             © 2025 TrustChain. All rights reserved.
           </p>

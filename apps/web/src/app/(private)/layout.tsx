@@ -29,11 +29,10 @@ export default function PrivateLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading } = useUser(); // Assuming this is where user data comes from
+  const { user, loading } = useUser();
   const router = useRouter();
   const pathname = usePathname();
 
-  // Your existing useEffects
   useEffect(() => {
     if (!loading && !user) {
       router.replace("/login");
@@ -59,7 +58,7 @@ export default function PrivateLayout({
               rotateY: 360
             }}
             transition={{
-              duration: 1,
+              duration: 1.5,
               repeat: Infinity,
               ease: "linear"
             }}

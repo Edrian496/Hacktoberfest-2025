@@ -59,9 +59,11 @@ export function AboutSection() {
           <div className="text-center">
             <div className="bg-[rgba(250,204,21,0.15)] rounded-full size-20 mx-auto mb-6 flex items-center justify-center">
               <div className="size-8">
-                <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 25 30">
-                  <path d={svgPaths.p1e4c8800} id="Vector" stroke="#00A7EE" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.66667" />
-                </svg>
+                <img 
+                src="./imports/fact-check.png" 
+                alt="AI Fact-Checking" 
+                className="w-full h-full object-contain" 
+                />
               </div>
             </div>
             <h3 className="font-['Manrope:Bold',_sans-serif] font-bold text-[20px] leading-[28px] text-[#101828] mb-3">
@@ -75,10 +77,12 @@ export function AboutSection() {
           {/* Verified Partners */}
           <div className="text-center">
             <div className="bg-[rgba(250,204,21,0.15)] rounded-full size-20 mx-auto mb-6 flex items-center justify-center">
-              <div className="size-8">
-                <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 25 30">
-                  <path d={svgPaths.p1e4c8800} id="Vector" stroke="#00A7EE" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.66667" />
-                </svg>
+              <div className="size-10">
+                <img 
+                src="./imports/partners.png" 
+                alt="Verified Partners" 
+                className="w-full h-full object-contain" 
+                />
               </div>
             </div>
             <h3 className="font-['Manrope:Bold',_sans-serif] font-bold text-[20px] leading-[28px] text-[#101828] mb-3">

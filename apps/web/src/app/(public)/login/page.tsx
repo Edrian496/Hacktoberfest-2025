@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,6 @@ import { supabase } from "@/lib/supabaseClient";
 
 export default function LoginRegisterPage() {
   const router = useRouter();
-
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [registerName, setRegisterName] = useState("");
@@ -85,14 +83,56 @@ export default function LoginRegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10 relative overflow-hidden">
+      
+      <div className="absolute inset-0 pointer-events-none">
+        
+        <div className="absolute top-3/4 left-1/2 w-60 h-60 md:w-96 md:h-96 lg:w-[50rem] lg:h-[60rem] mix-blend-multiply filter blur-3xl opacity-85 animate-orbit-1">
+          <svg viewBox="0 0 100 100" className="w-full h-full">
+            <defs>
+              <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: "#1e3a8a", stopOpacity: 0.6 }} />
+                <stop offset="100%" style={{ stopColor: "#3b82f6", stopOpacity: 0.3 }} />
+              </linearGradient>
+            </defs>
+            <polygon points="50,10 90,90 10,90" fill="url(#grad1)" />
+          </svg>
+        </div>
+
+        {/* Blob 2 - Yellow */}
+        <div className="absolute top-1/2 left-1/2 w-60 h-60 md:w-96 md:h-96 lg:w-[30rem] lg:h-[30rem] mix-blend-multiply filter blur-3xl opacity-90 animate-orbit-2">
+          <svg viewBox="0 0 100 100" className="w-full h-full">
+            <defs>
+              <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: "#eab308", stopOpacity: 0.6 }} />
+                <stop offset="100%" style={{ stopColor: "#facc15", stopOpacity: 0.3 }} />
+              </linearGradient>
+            </defs>
+            <polygon points="50,10 90,90 10,90" fill="url(#grad2)" />
+          </svg>
+        </div>
+
+        {/* Blob 3 - Light Blue */}
+        <div className="absolute top-1/2 left-1/2 w-60 h-60 md:w-96 md:h-96 lg:w-[60rem] lg:h-[60rem] mix-blend-multiply filter blur-3xl opacity-90 animate-orbit-3">
+          <svg viewBox="0 0 100 100" className="w-full h-full">
+            <defs>
+              <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: "#0ea5e9", stopOpacity: 0.6 }} />
+                <stop offset="100%" style={{ stopColor: "#38bdf8", stopOpacity: 0.3 }} />
+              </linearGradient>
+            </defs>
+            <polygon points="50,10 90,90 10,90" fill="url(#grad3)" />
+          </svg>
+        </div>
+      </div>
+
+      <Card className="w-full max-w-md relative z-10">
         <CardHeader className="text-center">
           <img
-        src="./imports/emblem.png" 
-        alt="TrustChain Emblem" 
-        className="pl-30 -mb-10"
-      />
+            src="./imports/emblem.png"
+            alt="TrustChain Emblem"
+            className="w-30 h-24 mx-auto -mb-7"
+          />
           <CardTitle className="text-3xl text-blue-900">
             Welcome to
             <span className="text-blue-900 font-bold text-3xl"> Trust</span>
@@ -266,6 +306,31 @@ export default function LoginRegisterPage() {
           </Tabs>
         </CardContent>
       </Card>
+
+      <style jsx>{`
+        @keyframes orbit {
+          0% {
+            transform: translate(-50%, -50%) rotate(0deg) translateX(40vw) rotate(0deg);
+          }
+          100% {
+            transform: translate(-50%, -50%) rotate(360deg) translateX(40vw) rotate(-360deg);
+          }
+        }
+        
+        .animate-orbit-1 {
+          animation: orbit 20s linear infinite;
+        }
+        
+        .animate-orbit-2 {
+          animation: orbit 20s linear infinite;
+          animation-delay: -6.66s;
+        }
+        
+        .animate-orbit-3 {
+          animation: orbit 20s linear infinite;
+          animation-delay: -13.33s;
+        }
+      `}</style>
     </div>
   );
 }
