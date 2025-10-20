@@ -54,7 +54,7 @@ export function Navigation({ isAdmin = false }: NavigationProps) {
 
   const adminLinks = [
     { section: "dashboard" as const, label: "Dashboard" },
-    { section: "transactions" as const, label: "Transactions" },
+    { section: "transactions" as const, label: "Transaction" },
   ];
 
   const links = isAdmin ? adminLinks : userLinks;
@@ -74,21 +74,21 @@ export function Navigation({ isAdmin = false }: NavigationProps) {
 
   const getLinkClasses = (item: NavLink) => {
     const baseClasses =
-      "font-['Manrope:Medium',_sans-serif] font-regular text-[14px] tracking-wide transition-all duration-300 hover:text-primary";
+      "font-['Manrope:Medium',_sans-serif] font-medium text-[14px] tracking-wide transition-all duration-300 hover:text-primary cursor-pointer";
 
     // For admin navigation, use section-based active state
     if (isAdmin && "section" in item) {
       if (activeSection === item.section) {
-        return `${baseClasses} text-primary border-b-[3px] border-primary pb-2`;
+        return `${baseClasses} text-primary border-b-[3px] border-primary pb-1`;
       }
-      return `${baseClasses} text-[#364153] border-b-[3px] border-transparent hover:border-primary`;
+      return `${baseClasses} text-[#364153] border-b-[3px] border-transparent pb-1 hover:border-primary`;
     }
 
     // For user navigation, use pathname-based active state
     if ("href" in item && pathname === item.href) {
-      return `${baseClasses} text-primary border-b-[3px] border-primary pb-2`;
+      return `${baseClasses} text-primary border-b-[3px] border-primary pb-1`;
     }
-    return `${baseClasses} text-[#364153] border-b-[3px] border-transparent hover:border-primary`;
+    return `${baseClasses} text-[#364153] border-b-[3px] border-transparent pb-1 hover:border-primary`;
   };
 
   const getMobileLinkClasses = (href: string) => {
