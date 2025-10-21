@@ -3,6 +3,23 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 
+const globalStyles = `
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px); /* Adjust the bounce height as needed */
+  }
+}
+
+.bouncing-airplane-wrapper {
+  animation: bounce 2s infinite ease-in-out; /* Adjust duration and timing as needed */
+  /* Ensure this wrapper doesn't interfere with the image's layout */
+  display: inline-block; /* Or block, depending on desired behavior */
+}
+`;
+
 function Group16() {
   return (
     <div className="relative size-full">
@@ -17,8 +34,8 @@ function Group16() {
 interface AirplaneProps {
   src: string;
   alt: string;
-  className?: string;
-  style?: React.CSSProperties;
+  className?: string; // This className will be for the outer positioning div
+  style?: React.CSSProperties; // This style will be for the outer positioning div
 }
 
 const AirplanePlaceholder: React.FC<AirplaneProps> = ({
@@ -27,7 +44,24 @@ const AirplanePlaceholder: React.FC<AirplaneProps> = ({
   className = "",
   style,
 }) => (
-  <img src={src} alt={alt} className={`absolute ${className}`} style={style} />
+  <div className={`absolute ${className}`} style={style}>
+    <div className="bouncing-airplane-wrapper transition-transform duration-300 hover:translate-x-5 hover:-translate-y-5" style={{userSelect: "none", pointerEvents: "auto", height: "100%", width: "100%"}}>
+      <img src={src} alt={alt} style={{width: "100%", height: "100%", display: "block"}} />
+    </div>
+  </div>
+);
+
+const AirplanePlaceholder1: React.FC<AirplaneProps> = ({
+  src,
+  alt,
+  className = "",
+  style,
+}) => (
+  <div className={`absolute ${className}`} style={style}>
+    <div className="bouncing-airplane-wrapper transition-transform duration-300 hover:-translate-x-5 hover:-translate-y-5" style={{userSelect: "none", pointerEvents: "auto", height: "100%", width: "100%"}}>
+      <img src={src} alt={alt} style={{width: "100%", height: "100%", display: "block"}} />
+    </div>
+  </div>
 );
 
 export function HeroSection() {
@@ -39,87 +73,77 @@ export function HeroSection() {
 
   return (
     <section className="bg-[rgba(0,167,238,0.05)] h-screen min-h-[600px] relative flex items-center justify-center overflow-hidden">
+      <style>{globalStyles}</style>
+
       <AirplanePlaceholder
         src="./imports/airplane4.png"
         alt="Airplane 1"
-        className="hidden md:block transition-transform duration-300 hover:translate-x-5 hover:-translate-y-5"
+        className="hidden md:block" 
         style={{
           top: "65%",
           left: "33%",
           width: "clamp(100px, 14vw, 170px)",
           transform: "translate(-50%, -50%)",
-          userSelect: "none",
-          pointerEvents: "auto",
         }}
       />
 
       <AirplanePlaceholder
         src="./imports/airplane5.png"
         alt="Airplane 2"
-        className="hidden md:block transition-transform duration-300 hover:translate-x-5 hover:-translate-y-5"
+        className="hidden md:block" 
         style={{
           bottom: "48%",
           left: "19%",
           width: "clamp(130px, 18vw, 250px)",
           transform: "translate(-50%, 50%)",
-          userSelect: "none",
-          pointerEvents: "auto",
         }}
       />
 
-      <AirplanePlaceholder
+      <AirplanePlaceholder1
         src="./imports/airplane2.png"
         alt="Airplane 3"
-        className="hidden md:block transition-transform duration-300 hover:-translate-x-5 hover:-translate-y-5"
+        className="hidden md:block" 
         style={{
           top: "51%",
           right: "18%",
           width: "clamp(130px, 18vw, 250px)",
           transform: "translate(50%, -50%)",
-          userSelect: "none",
-          pointerEvents: "auto",
         }}
       />
 
-      <AirplanePlaceholder
-        src="./imports/airplane3.png"
+      <AirplanePlaceholder1
+        src="./imports/airplane6.png"
         alt="Airplane 4"
-        className="hidden md:block transition-transform duration-300 hover:-translate-x-5 hover:-translate-y-5"
+        className="hidden md:block" 
         style={{
           bottom: "22%",
           right: "10%",
           width: "clamp(160px, 22vw, 300px)",
           transform: "translate(50%, 50%)",
-          userSelect: "none",
-          pointerEvents: "auto",
         }}
       />
 
       <AirplanePlaceholder
         src="./imports/airplane1.png"
         alt="Airplane 5"
-        className="hidden md:block transition-transform duration-300 hover:translate-x-5 hover:-translate-y-5"
+        className="hidden md:block" 
         style={{
           top: "76%",
           left: "10%",
           width: "clamp(160px, 22vw, 300px)",
           transform: "translate(-50%, -50%)",
-          userSelect: "none",
-          pointerEvents: "auto",
         }}
       />
 
-      <AirplanePlaceholder
+      <AirplanePlaceholder1
         src="./imports/airplane6.png"
         alt="Airplane 6"
-        className="hidden md:block transition-transform duration-300 hover:-translate-x-5 hover:-translate-y-5"
+        className="hidden md:block" 
         style={{
           top: "65%",
           right: "32%",
           width: "clamp(100px, 14vw, 170px)",
           transform: "translate(50%, -50%)",
-          userSelect: "none",
-          pointerEvents: "auto",
         }}
       />
 
