@@ -99,7 +99,6 @@ export default function LoginRegisterPage() {
           </svg>
         </div>
 
-        {/* Blob 2 - Yellow */}
         <div className="absolute top-1/2 left-1/2 w-60 h-60 md:w-96 md:h-96 lg:w-[30rem] lg:h-[30rem] mix-blend-multiply filter blur-3xl opacity-90 animate-orbit-2">
           <svg viewBox="0 0 100 100" className="w-full h-full">
             <defs>
@@ -112,7 +111,6 @@ export default function LoginRegisterPage() {
           </svg>
         </div>
 
-        {/* Blob 3 - Light Blue */}
         <div className="absolute top-1/2 left-1/2 w-60 h-60 md:w-96 md:h-96 lg:w-[60rem] lg:h-[60rem] mix-blend-multiply filter blur-3xl opacity-90 animate-orbit-3">
           <svg viewBox="0 0 100 100" className="w-full h-full">
             <defs>

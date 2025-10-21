@@ -222,6 +222,7 @@ html {
   --muted: #F3F4F6;
   --muted-foreground: #6B7280;
   --accent: #F4D96D;
+  --accent-rgb: 250, 204, 21;
   --accent-foreground: #111827;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
@@ -412,6 +413,16 @@ html {
 }
 
 
+.cursor-follower {
+  position: fixed; 
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent; 
+  border-right: 10px solid transparent; 
+  border-bottom: 15px solid var(--accent); 
+  transform: translate(-50%, -100%); 
+}
+
 @keyframes spin-once { 
   from {
     transform: rotate(0deg);
@@ -422,5 +433,5 @@ html {
 }
 
 .animate-rotate-once {
-  animation: spin-once 2s ease-out forwards; /* 2s duration, ease-out for a smooth stop, forwards to stay at the end state */
+  animation: spin-once 2s ease-out forwards; 
 }

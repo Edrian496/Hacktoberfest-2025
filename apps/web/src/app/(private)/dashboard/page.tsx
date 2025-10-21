@@ -159,15 +159,15 @@ export default function DashboardPage() {
       <main className="flex-1 p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
           {/* Wallet Info */}
-          <div className="mb-6 p-4 bg-muted rounded-lg border">
+          <div className="mb-6 p-4 bg-[rgba(0,167,238,0.10)] rounded-lg border border-[var(--secondary)]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Your Wallet</p>
-                <p className="font-mono text-xs">{walletAddress || "Not connected"}</p>
+                <h1 className="text-2xl font-semibold text-[var(--secondary)] foreground mb-1">Wallet</h1>
+                <p className="font-mono text-s">{walletAddress || "Not connected"}</p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-muted-foreground mb-1">Balance</p>
-                <p className="text-lg font-bold">{parseFloat(walletBalance).toFixed(4)} ETH</p>
+                <p className="text-3sm text-[var(--secondary)] foreground mb-1">Balance</p>
+                <p className="text-xl font-bold">{parseFloat(walletBalance).toFixed(4)} ETH</p>
               </div>
             </div>
           </div>
