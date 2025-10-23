@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useMemo, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,190 +23,251 @@ import {
   Heart,
   TrendingUp,
   Users,
-  Edit,
-  Trash2,
+  CheckCircle,
   Search,
   ChevronLeft,
   ChevronRight,
+  RefreshCw,
 } from "lucide-react";
 import { CreateCampaignModal } from "@/components/ui/create-campaign-modal";
+import { ethers } from "ethers";
+import ReliefDonationAbi from "@/abis/ReliefDonation.json";
+import deployment from "@/contracts/deployment.json";
 
-const campaigns = [
-  {
-    id: 1,
-    name: "7.8 Magnitude Earthquake - Northern Region",
-    location: "Northern Province, Region A",
-    status: "Active",
-    fundsRaised: 45000,
-    fundGoal: 100000,
-    donors: 234,
-  },
-  {
-    id: 2,
-    name: "Aftershock Relief - Coastal Areas",
-    location: "Coastal Region, District B",
-    status: "Active",
-    fundsRaised: 23000,
-    fundGoal: 50000,
-    donors: 142,
-  },
-  {
-    id: 3,
-    name: "Mountain Community Support",
-    location: "Mountain Province, Region C",
-    status: "Active",
-    fundsRaised: 67000,
-    fundGoal: 80000,
-    donors: 389,
-  },
-];
+interface Campaign {
+  id: string; // Changed to string for compatibility with Disaster type
+  name: string;
+  title: string; // Add for compatibility
+  description: string;
+  ngoAddress: string;
+  location: string; // Add for compatibility
+  status: "active" | "completed"; // Changed to match Disaster type
+  targetAmount: bigint;
+  raisedAmount: bigint;
+  disbursedAmount: bigint;
+  startTime: bigint;
+  endTime: bigint;
+  isVerified: boolean;
+  isActive: boolean;
+  ipfsMetadata: string;
+  fundGoal?: number;
+  fundsRaised?: number;
+  donors?: number;
+}
 
-// Extended mock data for comprehensive transaction tracking
-const allTransactions = [
-  {
-    id: 1,
-    donor: "John Doe",
-    campaign: "7.8 Magnitude Earthquake",
-    amount: 500,
-    transactionHash: "0xa7f2...8c4d",
-    fullHash:
-      "0xa7f2c8e9d1b4a5f3c2e1d9b8a7c6e5f4d3c2b1a09f8e7d6c5b4a3c2b1a09f8c4d",
-    date: "2025-10-15",
-    status: "verified",
-  },
-  {
-    id: 2,
-    donor: "Jane Smith",
-    campaign: "Aftershock Relief",
-    amount: 300,
-    transactionHash: "0xb3e9...1f4a",
-    fullHash:
-      "0xb3e9d2c5f8a1b4e7d0c3f6a9b2e5d8c1f4a7b0e3d6c9f2a5b8e1d4c7f0a3b1f4a",
-    date: "2025-10-10",
-    status: "verified",
-  },
-  {
-    id: 3,
-    donor: "Bob Johnson",
-    campaign: "Mountain Community",
-    amount: 750,
-    transactionHash: "0xc4e7...2f5a",
-    fullHash:
-      "0xc4e7a3d9b5f1c8e4a0d6b2f8c4e0a6d2b8f4c0e6a2d8b4f0c6e2a8d4f0c2e8a2f5a",
-    date: "2025-10-16",
-    status: "verified",
-  },
-  {
-    id: 4,
-    donor: "Alice Williams",
-    campaign: "7.8 Magnitude Earthquake",
-    amount: 1000,
-    transactionHash: "0xd5f8...3a6b",
-    fullHash:
-      "0xd5f8c1a4e7b0d3f6a9c2e5d8b1f4a7c0e3d6b9f2a5c8e1d4b7f0a3c6e9d2f5a3a6b",
-    date: "2025-10-14",
-    status: "pending",
-  },
-  {
-    id: 5,
-    donor: "Michael Brown",
-    campaign: "Aftershock Relief",
-    amount: 450,
-    transactionHash: "0xe6a9...4b7c",
-    fullHash:
-      "0xe6a9d2f5c8b1e4a7d0c3f6b9e2d5c8f1a4b7e0d3c6f9b2e5d8c1f4a7b0e3d6c4b7c",
-    date: "2025-10-12",
-    status: "verified",
-  },
-  {
-    id: 6,
-    donor: "Sarah Davis",
-    campaign: "Mountain Community",
-    amount: 2000,
-    transactionHash: "0xf7b0...5c8d",
-    fullHash:
-      "0xf7b0e3d6c9f2a5b8e1d4c7f0a3b6e9d2f5c8b1e4a7d0c3f6b9e2d5c8f1a4b7e5c8d",
-    date: "2025-10-18",
-    status: "verified",
-  },
-  {
-    id: 7,
-    donor: "David Martinez",
-    campaign: "7.8 Magnitude Earthquake",
-    amount: 350,
-    transactionHash: "0xa1c2...6d9e",
-    fullHash:
-      "0xa1c2e4f6b8d0c3e5f7b9d1c3e5f7b9d1c3e5f7b9d1c3e5f7b9d1c3e5f7b9d1c6d9e",
-    date: "2025-10-17",
-    status: "failed",
-  },
-  {
-    id: 8,
-    donor: "Emily Garcia",
-    campaign: "Aftershock Relief",
-    amount: 600,
-    transactionHash: "0xb2d3...7e0f",
-    fullHash:
-      "0xb2d3f5a7c9e1d4f6a8c0e2d4f6a8c0e2d4f6a8c0e2d4f6a8c0e2d4f6a8c0e2d7e0f",
-    date: "2025-10-13",
-    status: "verified",
-  },
-  {
-    id: 9,
-    donor: "James Rodriguez",
-    campaign: "Mountain Community",
-    amount: 850,
-    transactionHash: "0xc3e4...8f1a",
-    fullHash:
-      "0xc3e4a6b8d0f2c4e6a8d0f2c4e6a8d0f2c4e6a8d0f2c4e6a8d0f2c4e6a8d0f2c8f1a",
-    date: "2025-10-11",
-    status: "pending",
-  },
-  {
-    id: 10,
-    donor: "Lisa Anderson",
-    campaign: "7.8 Magnitude Earthquake",
-    amount: 1200,
-    transactionHash: "0xd4f5...9a2b",
-    fullHash:
-      "0xd4f5b7c9e1f3a5c7e9f1a3c5e7f9a1c3e5f7a9c1e3f5a7c9e1f3a5c7e9f1a3c9a2b",
-    date: "2025-10-09",
-    status: "verified",
-  },
-  {
-    id: 11,
-    donor: "Robert Taylor",
-    campaign: "Aftershock Relief",
-    amount: 400,
-    transactionHash: "0xe5a6...0b3c",
-    fullHash:
-      "0xe5a6c8e0f2a4c6e8f0a2c4e6f8a0c2e4f6a8c0e2f4a6c8e0f2a4c6e8f0a2c4e0b3c",
-    date: "2025-10-08",
-    status: "verified",
-  },
-  {
-    id: 12,
-    donor: "Maria Thomas",
-    campaign: "Mountain Community",
-    amount: 950,
-    transactionHash: "0xf6b7...1c4d",
-    fullHash:
-      "0xf6b7d9f1a3c5e7f9a1c3e5f7a9c1e3f5a7c9e1f3a5c7e9f1a3c5e7f9a1c3e5f1c4d",
-    date: "2025-10-07",
-    status: "pending",
-  },
-];
+interface Transaction {
+  id: number;
+  donor: string;
+  campaign: string;
+  amount: number;
+  transactionHash: string;
+  fullHash: string;
+  date: string;
+  status: string;
+}
 
 export default function AdminDashboard() {
+  // Blockchain state
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   // Transaction tracking state
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Refs for scroll navigation
   const dashboardRef = useRef<HTMLDivElement>(null);
   const transactionsRef = useRef<HTMLDivElement>(null);
+
+  // Load blockchain data
+  useEffect(() => {
+    loadBlockchainData();
+  }, []);
+
+  const loadBlockchainData = async () => {
+    try {
+      setLoading(true);
+      if (!window.ethereum) {
+        console.log("MetaMask not installed");
+        return;
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const contract = new ethers.Contract(
+        deployment.contracts.ReliefDonation,
+        ReliefDonationAbi.abi,
+        provider
+      );
+
+      // Get campaign counter
+      const campaignCounter = await contract.campaignCounter();
+      const campaignCount = Number(campaignCounter);
+
+      // Fetch all campaigns
+      const campaignsData: Campaign[] = [];
+      for (let i = 1; i <= campaignCount; i++) {
+        const campaign = await contract.campaigns(i);
+        if (campaign.id !== 0n) {
+          // Determine status based on blockchain data
+          const isCompleted = campaign.raisedAmount >= campaign.targetAmount || !campaign.isActive;
+          const status: "active" | "completed" = isCompleted ? "completed" : "active";
+          
+          campaignsData.push({
+            id: Number(campaign.id).toString(), // Convert to string for compatibility
+            name: campaign.name,
+            title: campaign.name, // For compatibility with CreateCampaignModal
+            description: campaign.description,
+            ngoAddress: campaign.ngoAddress,
+            location: "On-chain", // Default value for compatibility
+            status: status,
+            targetAmount: campaign.targetAmount,
+            raisedAmount: campaign.raisedAmount,
+            disbursedAmount: campaign.disbursedAmount,
+            startTime: campaign.startTime,
+            endTime: campaign.endTime,
+            isVerified: campaign.isVerified,
+            isActive: campaign.isActive,
+            ipfsMetadata: campaign.ipfsMetadata,
+            fundGoal: Number(ethers.formatEther(campaign.targetAmount)),
+            fundsRaised: Number(ethers.formatEther(campaign.raisedAmount)),
+            donors: 0, // You can fetch this from events if needed
+          });
+        }
+      }
+
+      setCampaigns(campaignsData);
+
+      // Fetch donation events for transactions
+      const donationFilter = contract.filters.DonationReceived();
+      
+      // Get current block number
+      const currentBlock = await provider.getBlockNumber();
+      console.log(`Current block: ${currentBlock}`);
+      
+      // Query in chunks to avoid RPC limit (100,000 blocks per query)
+      const CHUNK_SIZE = 50000; // Safe chunk size
+      let allDonationEvents: any[] = [];
+      
+      // Start from a reasonable block (or calculate based on contract deployment)
+      // For now, let's go back 500,000 blocks which should cover most deployments
+      const startBlock = Math.max(0, currentBlock - 500000);
+      
+      console.log(`Querying events from block ${startBlock} to ${currentBlock}`);
+      
+      for (let fromBlock = startBlock; fromBlock <= currentBlock; fromBlock += CHUNK_SIZE) {
+        const toBlock = Math.min(fromBlock + CHUNK_SIZE - 1, currentBlock);
+        console.log(`Fetching events from block ${fromBlock} to ${toBlock}`);
+        
+        try {
+          const events = await contract.queryFilter(donationFilter, fromBlock, toBlock);
+          allDonationEvents = allDonationEvents.concat(events);
+          console.log(`Found ${events.length} events in this chunk`);
+        } catch (error) {
+          console.error(`Error fetching events from ${fromBlock} to ${toBlock}:`, error);
+        }
+      }
+      
+      console.log(`Found ${allDonationEvents.length} total donation events`);
+
+      const transactionsData: (Transaction | null)[] = await Promise.all(
+        allDonationEvents.map(async (event, index) => {
+          try {
+            // Type guard to check if it's an EventLog
+            if (!('args' in event)) {
+              console.log('Event does not have args:', event);
+              return null;
+            }
+            
+            const args = event.args;
+            const block = await event.getBlock();
+            const campaignData = campaignsData.find(
+              (c) => c.id === Number(args.campaignId).toString()
+            );
+
+            return {
+              id: index + 1,
+              donor: args.donor,
+              campaign: campaignData?.name || "Unknown Campaign",
+              amount: Number(ethers.formatEther(args.amount)),
+              transactionHash: event.transactionHash.slice(0, 10) + "...",
+              fullHash: event.transactionHash,
+              date: new Date(Number(block.timestamp) * 1000).toISOString().split("T")[0],
+              status: "verified",
+            };
+          } catch (error) {
+            console.error('Error processing event:', error);
+            return null;
+          }
+        })
+      );
+
+      // Filter out null values and reverse for most recent first
+      const validTransactions = transactionsData.filter((t): t is Transaction => t !== null);
+      console.log(`Processed ${validTransactions.length} valid transactions`);
+      setTransactions(validTransactions.reverse());
+    } catch (error) {
+      console.error("Error loading blockchain data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const refreshData = async () => {
+    setIsRefreshing(true);
+    await loadBlockchainData();
+    setIsRefreshing(false);
+  };
+
+  const handleVerifyCampaign = async (campaignId: string) => {
+    if (!window.ethereum) {
+      alert("Please install MetaMask!");
+      return;
+    }
+
+    if (!confirm("Are you sure you want to verify this campaign?")) {
+      return;
+    }
+
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      const signer = await provider.getSigner();
+      const address = await signer.getAddress();
+
+      const contract = new ethers.Contract(
+        deployment.contracts.ReliefDonation,
+        ReliefDonationAbi.abi,
+        signer
+      );
+
+      // Check VERIFIER role
+      const VERIFIER_ROLE = ethers.keccak256(ethers.toUtf8Bytes("VERIFIER_ROLE"));
+      const hasRole = await contract.hasRole(VERIFIER_ROLE, address);
+      
+      if (!hasRole) {
+        alert("You need VERIFIER role to verify campaigns!");
+        return;
+      }
+
+      // Verify the campaign
+      const tx = await contract.verifyCampaign(campaignId, {
+        gasLimit: 100_000
+      });
+      
+      alert(`Verification transaction submitted!\nHash: ${tx.hash}`);
+      await tx.wait();
+      alert("Campaign verified successfully! 🎉");
+      
+      // Refresh data
+      await refreshData();
+    } catch (error: any) {
+      console.error("Error verifying campaign:", error);
+      alert(`Failed: ${error.reason || error.message || "Unknown error"}`);
+    }
+  };
 
   // Listen for navigation events
   useEffect(() => {
@@ -227,7 +287,6 @@ export default function AdminDashboard() {
         });
       }
     };
-
     window.addEventListener("navigateToSection", handleScrollToSection);
     return () => {
       window.removeEventListener("navigateToSection", handleScrollToSection);
@@ -236,7 +295,7 @@ export default function AdminDashboard() {
 
   // Filter and paginate transactions
   const filteredTransactions = useMemo(() => {
-    return allTransactions.filter((transaction) => {
+    return transactions.filter((transaction) => {
       const matchesSearch =
         transaction.donor.toLowerCase().includes(searchQuery.toLowerCase()) ||
         transaction.campaign
@@ -244,14 +303,14 @@ export default function AdminDashboard() {
           .includes(searchQuery.toLowerCase()) ||
         transaction.transactionHash
           .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        transaction.fullHash
+          .toLowerCase()
           .includes(searchQuery.toLowerCase());
-
-      const matchesStatus =
-        statusFilter === "all" || transaction.status === statusFilter;
-
-      return matchesSearch && matchesStatus;
+      
+      return matchesSearch;
     });
-  }, [searchQuery, statusFilter]);
+  }, [transactions, searchQuery]);
 
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
   const paginatedTransactions = useMemo(() => {
@@ -289,26 +348,48 @@ export default function AdminDashboard() {
   // Calculate total stats
   const totalCampaigns = campaigns.length;
   const totalFundsRaised = campaigns.reduce(
-    (sum, campaign) => sum + campaign.fundsRaised,
+    (sum, campaign) => sum + (campaign.fundsRaised || 0),
     0
   );
-  const totalDonors = campaigns.reduce(
-    (sum, campaign) => sum + campaign.donors,
-    0
-  );
+  const totalDonors = transactions.reduce((acc, curr) => {
+    return acc.add(curr.donor);
+  }, new Set()).size;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading blockchain data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div ref={dashboardRef} className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold text-gray-900">
-            Admin Dashboard
-          </h1>
-          <p className="text-gray-600">
-            Manage disaster campaigns and monitor donations
-          </p>
+        <div ref={dashboardRef} className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="mb-2 text-3xl font-bold text-gray-900">
+              Admin Dashboard
+            </h1>
+            <p className="text-gray-600">
+              Manage disaster campaigns and monitor donations
+            </p>
+          </div>
+          <Button
+            onClick={refreshData}
+            disabled={isRefreshing}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
         </div>
 
         {/* Stats Cards */}
@@ -343,7 +424,7 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-gray-900">
-                ₱{totalFundsRaised.toLocaleString()}
+                {totalFundsRaised.toFixed(2)} ETH
               </div>
               <p className="text-sm text-gray-500 mt-1">Across all campaigns</p>
             </CardContent>
@@ -363,7 +444,7 @@ export default function AdminDashboard() {
                 {totalDonors}
               </div>
               <p className="text-sm text-gray-500 mt-1">
-                Contributors to all campaigns
+                Unique contributors
               </p>
             </CardContent>
           </Card>
@@ -375,7 +456,7 @@ export default function AdminDashboard() {
             <CardTitle className="text-xl font-semibold text-gray-900">
               Disaster Campaigns
             </CardTitle>
-            <CreateCampaignModal />
+            <CreateCampaignModal onCampaignCreated={refreshData} />
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
@@ -386,7 +467,7 @@ export default function AdminDashboard() {
                       Campaign
                     </TableHead>
                     <TableHead className="font-semibold text-gray-700">
-                      Location
+                      NGO Address
                     </TableHead>
                     <TableHead className="font-semibold text-gray-700">
                       Status
@@ -395,7 +476,7 @@ export default function AdminDashboard() {
                       Funds
                     </TableHead>
                     <TableHead className="font-semibold text-gray-700">
-                      Donors
+                      Progress
                     </TableHead>
                     <TableHead className="text-right font-semibold text-gray-700">
                       Actions
@@ -403,55 +484,89 @@ export default function AdminDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {campaigns.map((campaign) => (
-                    <TableRow key={campaign.id} className="hover:bg-gray-50">
-                      <TableCell className="font-medium text-gray-900">
-                        {campaign.name}
-                      </TableCell>
-                      <TableCell className="text-gray-600">
-                        {campaign.location}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="bg-green-50 text-green-700 border-green-200 font-medium"
-                        >
-                          {campaign.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-gray-900 font-medium">
-                        ₱{campaign.fundsRaised.toLocaleString()} / ₱
-                        {campaign.fundGoal.toLocaleString()}
-                      </TableCell>
-                      <TableCell className="text-gray-900">
-                        {campaign.donors}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                            onClick={() =>
-                              console.log("Edit campaign:", campaign.id)
+                  {campaigns.length > 0 ? (
+                    campaigns.map((campaign) => (
+                      <TableRow key={campaign.id} className="hover:bg-gray-50">
+                        <TableCell className="font-medium text-gray-900">
+                          {campaign.name}
+                        </TableCell>
+                        <TableCell className="text-gray-600 font-mono text-xs">
+                          {campaign.ngoAddress.slice(0, 6)}...{campaign.ngoAddress.slice(-4)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={
+                              campaign.status === "active"
+                                ? campaign.isVerified
+                                  ? "bg-green-50 text-green-700 border-green-200 font-medium"
+                                  : "bg-yellow-50 text-yellow-700 border-yellow-200 font-medium"
+                                : "bg-gray-50 text-gray-700 border-gray-200 font-medium"
                             }
                           >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={() =>
-                              console.log("Delete campaign:", campaign.id)
-                            }
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
+                            {campaign.status === "active"
+                              ? campaign.isVerified
+                                ? "Active"
+                                : "Pending Verification"
+                              : "Completed"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-gray-900 font-medium">
+                          {campaign.fundsRaised?.toFixed(4)} ETH / {campaign.fundGoal?.toFixed(2)} ETH
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 bg-gray-200 rounded-full h-2">
+                              <div
+                                className="bg-blue-600 h-2 rounded-full"
+                                style={{
+                                  width: `${Math.min(
+                                    ((campaign.fundsRaised || 0) / (campaign.fundGoal || 1)) * 100,
+                                    100
+                                  )}%`,
+                                }}
+                              />
+                            </div>
+                            <span className="text-xs text-gray-600">
+                              {Math.round(
+                                ((campaign.fundsRaised || 0) / (campaign.fundGoal || 1)) * 100
+                              )}%
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            {campaign.status === "active" && !campaign.isVerified && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 text-green-600 hover:text-green-700 hover:bg-green-50 flex items-center gap-1"
+                                onClick={() => handleVerifyCampaign(campaign.id)}
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                                Verify
+                              </Button>
+                            )}
+                            {campaign.status === "active" && campaign.isVerified && (
+                              <span className="text-sm text-gray-500 italic">Verified</span>
+                            )}
+                            {campaign.status === "completed" && (
+                              <span className="text-sm text-gray-500 italic">Completed</span>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell
+                        colSpan={6}
+                        className="text-center py-8 text-gray-500"
+                      >
+                        No campaigns found. Create your first campaign to get started.
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )}
                 </TableBody>
               </Table>
             </div>
@@ -468,7 +583,6 @@ export default function AdminDashboard() {
             <CardTitle className="text-xl font-semibold text-gray-900">
               All Transactions
             </CardTitle>
-
             {/* Search and Filters */}
             <div className="flex flex-col sm:flex-row gap-4 mt-4">
               <div className="relative flex-1">
@@ -481,19 +595,6 @@ export default function AdminDashboard() {
                   className="pl-10"
                 />
               </div>
-
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="verified">Verified</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="failed">Failed</SelectItem>
-                </SelectContent>
-              </Select>
-
               <Select
                 value={itemsPerPage.toString()}
                 onValueChange={(value) => {
@@ -513,7 +614,6 @@ export default function AdminDashboard() {
               </Select>
             </div>
           </CardHeader>
-
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <Table>
@@ -546,19 +646,24 @@ export default function AdminDashboard() {
                         key={transaction.id}
                         className="hover:bg-gray-50"
                       >
-                        <TableCell className="font-medium text-gray-900">
-                          {transaction.donor}
+                        <TableCell className="font-medium text-gray-900 font-mono text-xs">
+                          {transaction.donor.slice(0, 6)}...{transaction.donor.slice(-4)}
                         </TableCell>
                         <TableCell className="text-gray-600">
                           {transaction.campaign}
                         </TableCell>
                         <TableCell className="font-semibold text-gray-900">
-                          ₱{transaction.amount.toLocaleString()}
+                          {transaction.amount.toFixed(4)} ETH
                         </TableCell>
                         <TableCell>
-                          <code className="relative rounded bg-gray-100 px-2.5 py-1 font-mono text-xs text-gray-700 border border-gray-200">
+                          <a
+                            href={`https://etherscan.io/tx/${transaction.fullHash}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="relative rounded bg-gray-100 px-2.5 py-1 font-mono text-xs text-gray-700 border border-gray-200 hover:bg-gray-200 transition-colors"
+                          >
                             {transaction.transactionHash}
-                          </code>
+                          </a>
                         </TableCell>
                         <TableCell>
                           {getStatusBadge(transaction.status)}
@@ -588,7 +693,6 @@ export default function AdminDashboard() {
                 </TableBody>
               </Table>
             </div>
-
             {/* Pagination */}
             {filteredTransactions.length > 0 && (
               <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
@@ -600,7 +704,6 @@ export default function AdminDashboard() {
                   )}{" "}
                   of {filteredTransactions.length} transactions
                 </div>
-
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
@@ -613,7 +716,6 @@ export default function AdminDashboard() {
                     <ChevronLeft className="w-4 h-4" />
                     Previous
                   </Button>
-
                   <div className="flex items-center gap-1">
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                       let pageNumber;
@@ -626,7 +728,6 @@ export default function AdminDashboard() {
                       } else {
                         pageNumber = currentPage - 2 + i;
                       }
-
                       return (
                         <Button
                           key={pageNumber}
@@ -642,7 +743,6 @@ export default function AdminDashboard() {
                       );
                     })}
                   </div>
-
                   <Button
                     variant="outline"
                     size="sm"
