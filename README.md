@@ -1,5 +1,17 @@
 # 🚀 Quick Setup Guide
 
+## 📖 Project Description
+
+A transparent disaster relief donation platform that combines blockchain technology, AI-powered fact-checking, and modern web development to ensure accountability and trust in charitable donations.
+
+**Key Features:**
+- 🔗 **Blockchain Transparency** - All donations recorded on Lisk blockchain
+- 🤖 **AI Fact-Checking** - Verify campaign authenticity in real-time
+- 📊 **Milestone Tracking** - Conditional fund release based on verified progress
+- 🔐 **Role-Based Access** - Admin, NGO, and Verifier roles for security
+
+---
+
 ## 🛠️ Tech Stack
 
 ### Frontend
