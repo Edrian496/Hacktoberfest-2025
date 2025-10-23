@@ -1,6 +1,8 @@
 "use client";
 import { useState, useMemo, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRouter } from "next/navigation"; 
+import { supabase } from "@/lib/supabaseClient"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -67,6 +69,13 @@ interface Transaction {
 }
 
 export default function AdminDashboard() {
+  // Router
+  const router = useRouter();
+
+  // Auth state
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loadingAuth, setLoadingAuth] = useState(true);
+
   // Blockchain state
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -81,6 +90,47 @@ export default function AdminDashboard() {
   // Refs for scroll navigation
   const dashboardRef = useRef<HTMLDivElement>(null);
   const transactionsRef = useRef<HTMLDivElement>(null);
+
+   useEffect(() => {
+    const checkAdmin = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session || !session.user) {
+        router.replace("/login");
+        return;
+      }
+
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", session.user.id)
+        .single();
+
+      if (error || profile?.role !== "admin") {
+        router.replace("/login");
+        return;
+      }
+
+      setIsAdmin(true);
+      setLoadingAuth(false);
+    };
+
+    checkAdmin();
+  }, [router]);
+
+  if (loadingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Checking admin access...</p>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return null;
+  }
 
   // Load blockchain data
   useEffect(() => {
@@ -170,44 +220,29 @@ export default function AdminDashboard() {
         }
       }
       
-      console.log(`Found ${allDonationEvents.length} total donation events`);
+      console.log(`Total donation events found: ${allDonationEvents.length}`);
 
-      const transactionsData: (Transaction | null)[] = await Promise.all(
+      const transactionsData: Transaction[] = await Promise.all(
         allDonationEvents.map(async (event, index) => {
-          try {
-            // Type guard to check if it's an EventLog
-            if (!('args' in event)) {
-              console.log('Event does not have args:', event);
-              return null;
-            }
-            
-            const args = event.args;
-            const block = await event.getBlock();
-            const campaignData = campaignsData.find(
-              (c) => c.id === Number(args.campaignId).toString()
-            );
+          const block = await event.getBlock();
+          const campaignId = Number(event.args[0]);
+          const campaignName =
+            campaignsData.find((c) => c.id === campaignId.toString())?.name || `Campaign ${campaignId}`;
 
-            return {
-              id: index + 1,
-              donor: args.donor,
-              campaign: campaignData?.name || "Unknown Campaign",
-              amount: Number(ethers.formatEther(args.amount)),
-              transactionHash: event.transactionHash.slice(0, 10) + "...",
-              fullHash: event.transactionHash,
-              date: new Date(Number(block.timestamp) * 1000).toISOString().split("T")[0],
-              status: "verified",
-            };
-          } catch (error) {
-            console.error('Error processing event:', error);
-            return null;
-          }
+          return {
+            id: index + 1,
+            donor: event.args[1],
+            campaign: campaignName,
+            amount: Number(ethers.formatEther(event.args[2])),
+            transactionHash: `${event.transactionHash.slice(0, 10)}...${event.transactionHash.slice(-8)}`,
+            fullHash: event.transactionHash,
+            date: new Date(Number(block.timestamp) * 1000).toISOString(),
+            status: "confirmed",
+          };
         })
       );
 
-      // Filter out null values and reverse for most recent first
-      const validTransactions = transactionsData.filter((t): t is Transaction => t !== null);
-      console.log(`Processed ${validTransactions.length} valid transactions`);
-      setTransactions(validTransactions.reverse());
+      setTransactions(transactionsData.reverse()); // Most recent first
     } catch (error) {
       console.error("Error loading blockchain data:", error);
     } finally {
@@ -221,242 +256,193 @@ export default function AdminDashboard() {
     setIsRefreshing(false);
   };
 
-  const handleVerifyCampaign = async (campaignId: string) => {
-    if (!window.ethereum) {
-      alert("Please install MetaMask!");
-      return;
-    }
+  // Calculate statistics
+  const stats = useMemo(() => {
+    const totalFunds = campaigns.reduce(
+      (sum, campaign) => sum + (campaign.fundsRaised || 0),
+      0
+    );
+    const activeCampaigns = campaigns.filter((c) => c.status === "active").length;
+    const completedCampaigns = campaigns.filter(
+      (c) => c.status === "completed"
+    ).length;
+    const totalDonors = new Set(transactions.map((t) => t.donor)).size;
 
-    if (!confirm("Are you sure you want to verify this campaign?")) {
-      return;
-    }
-
-    try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      await window.ethereum.request({ method: "eth_requestAccounts" });
-      const signer = await provider.getSigner();
-      const address = await signer.getAddress();
-
-      const contract = new ethers.Contract(
-        deployment.contracts.ReliefDonation,
-        ReliefDonationAbi.abi,
-        signer
-      );
-
-      // Check VERIFIER role
-      const VERIFIER_ROLE = ethers.keccak256(ethers.toUtf8Bytes("VERIFIER_ROLE"));
-      const hasRole = await contract.hasRole(VERIFIER_ROLE, address);
-      
-      if (!hasRole) {
-        alert("You need VERIFIER role to verify campaigns!");
-        return;
-      }
-
-      // Verify the campaign
-      const tx = await contract.verifyCampaign(campaignId, {
-        gasLimit: 100_000
-      });
-      
-      alert(`Verification transaction submitted!\nHash: ${tx.hash}`);
-      await tx.wait();
-      alert("Campaign verified successfully! 🎉");
-      
-      // Refresh data
-      await refreshData();
-    } catch (error: any) {
-      console.error("Error verifying campaign:", error);
-      alert(`Failed: ${error.reason || error.message || "Unknown error"}`);
-    }
-  };
-
-  // Listen for navigation events
-  useEffect(() => {
-    const handleScrollToSection = (event: Event) => {
-      const customEvent = event as CustomEvent<{
-        section: "dashboard" | "transactions";
-      }>;
-      if (customEvent.detail.section === "dashboard") {
-        dashboardRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      } else if (customEvent.detail.section === "transactions") {
-        transactionsRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }
+    return {
+      totalFunds: totalFunds.toFixed(2),
+      activeCampaigns,
+      completedCampaigns,
+      totalDonors,
     };
-    window.addEventListener("navigateToSection", handleScrollToSection);
-    return () => {
-      window.removeEventListener("navigateToSection", handleScrollToSection);
-    };
-  }, []);
+  }, [campaigns, transactions]);
 
   // Filter and paginate transactions
   const filteredTransactions = useMemo(() => {
-    return transactions.filter((transaction) => {
-      const matchesSearch =
+    return transactions.filter(
+      (transaction) =>
         transaction.donor.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        transaction.campaign
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        transaction.transactionHash
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        transaction.fullHash
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase());
-      
-      return matchesSearch;
-    });
+        transaction.campaign.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        transaction.fullHash.toLowerCase().includes(searchQuery.toLowerCase())
+    );
   }, [transactions, searchQuery]);
 
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
   const paginatedTransactions = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return filteredTransactions.slice(startIndex, endIndex);
+    return filteredTransactions.slice(startIndex, startIndex + itemsPerPage);
   }, [filteredTransactions, currentPage, itemsPerPage]);
 
-  // Get status badge styling
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "verified":
+      case "confirmed":
         return (
-          <Badge className="bg-green-50 text-green-700 border-green-200">
-            Verified
-          </Badge>
-        );
-      case "pending":
-        return (
-          <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200">
-            Pending
-          </Badge>
-        );
-      case "failed":
-        return (
-          <Badge className="bg-red-50 text-red-700 border-red-200">
-            Failed
+          <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Confirmed
           </Badge>
         );
       default:
-        return <Badge>{status}</Badge>;
+        return (
+          <Badge variant="secondary" className="bg-gray-100 text-gray-700">
+            {status}
+          </Badge>
+        );
     }
   };
 
-  // Calculate total stats
-  const totalCampaigns = campaigns.length;
-  const totalFundsRaised = campaigns.reduce(
-    (sum, campaign) => sum + (campaign.fundsRaised || 0),
-    0
-  );
-  const totalDonors = transactions.reduce((acc, curr) => {
-    return acc.add(curr.donor);
-  }, new Set()).size;
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement | null>) => {
+    ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading blockchain data...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div ref={dashboardRef} className="mb-8 flex items-center justify-between">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Header with Refresh Button */}
+        <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="mb-2 text-3xl font-bold text-gray-900">
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">
               Admin Dashboard
             </h1>
             <p className="text-gray-600">
-              Manage disaster campaigns and monitor donations
+              Manage campaigns and track all platform activity
             </p>
           </div>
           <Button
             onClick={refreshData}
             disabled={isRefreshing}
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
+            className="bg-blue-600 hover:bg-blue-700"
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
-            Refresh
+            <RefreshCw
+              className={`w-4 h-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+            />
+            {isRefreshing ? "Refreshing..." : "Refresh Data"}
           </Button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid gap-6 md:grid-cols-3 mb-8">
+        {/* Quick Navigation */}
+        <div className="mb-6 flex gap-4">
+          <Button
+            variant="outline"
+            onClick={() => scrollToSection(dashboardRef)}
+            className="text-sm"
+          >
+            Overview
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => scrollToSection(transactionsRef)}
+            className="text-sm"
+          >
+            Transactions
+          </Button>
+        </div>
+
+        {/* Stats Overview */}
+        <div ref={dashboardRef} className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                Total Campaigns
-              </CardTitle>
-              <div className="p-2 bg-red-50 rounded-lg">
-                <Heart className="w-5 h-5 text-red-500" />
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Total Funds</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {stats.totalFunds} ETH
+                  </p>
+                </div>
+                <div className="p-3 bg-blue-100 rounded-full">
+                  <Heart className="w-6 h-6 text-blue-600" />
+                </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-gray-900">
-                {totalCampaigns}
-              </div>
-              <p className="text-sm text-gray-500 mt-1">
-                Active disaster relief campaigns
-              </p>
             </CardContent>
           </Card>
 
           <Card className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                Total Funds Raised
-              </CardTitle>
-              <div className="p-2 bg-green-50 rounded-lg">
-                <TrendingUp className="w-5 h-5 text-green-500" />
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Active Campaigns</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {stats.activeCampaigns}
+                  </p>
+                </div>
+                <div className="p-3 bg-green-100 rounded-full">
+                  <TrendingUp className="w-6 h-6 text-green-600" />
+                </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-gray-900">
-                {totalFundsRaised.toFixed(2)} ETH
-              </div>
-              <p className="text-sm text-gray-500 mt-1">Across all campaigns</p>
             </CardContent>
           </Card>
 
           <Card className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                Total Donors
-              </CardTitle>
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <Users className="w-5 h-5 text-blue-500" />
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">
+                    Completed Campaigns
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {stats.completedCampaigns}
+                  </p>
+                </div>
+                <div className="p-3 bg-purple-100 rounded-full">
+                  <CheckCircle className="w-6 h-6 text-purple-600" />
+                </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-gray-900">
-                {totalDonors}
+            </CardContent>
+          </Card>
+
+          <Card className="border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Total Donors</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {stats.totalDonors}
+                  </p>
+                </div>
+                <div className="p-3 bg-orange-100 rounded-full">
+                  <Users className="w-6 h-6 text-orange-600" />
+                </div>
               </div>
-              <p className="text-sm text-gray-500 mt-1">
-                Unique contributors
-              </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Disaster Campaigns Section */}
-        <Card className="mb-8 border-gray-200 shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between border-b border-gray-100 pb-4">
-            <CardTitle className="text-xl font-semibold text-gray-900">
-              Disaster Campaigns
-            </CardTitle>
-            <CreateCampaignModal onCampaignCreated={refreshData} />
+        {/* Campaigns Management */}
+        <Card className="border-gray-200 shadow-sm mb-8">
+          <CardHeader className="border-b border-gray-100 pb-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl font-semibold text-gray-900">
+                Campaign Management
+              </CardTitle>
+              <CreateCampaignModal onCampaignCreated={refreshData} />
+            </div>
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
@@ -464,19 +450,19 @@ export default function AdminDashboard() {
                 <TableHeader>
                   <TableRow className="bg-gray-50 hover:bg-gray-50">
                     <TableHead className="font-semibold text-gray-700">
-                      Campaign
+                      Campaign Name
                     </TableHead>
                     <TableHead className="font-semibold text-gray-700">
-                      NGO Address
+                      Goal
                     </TableHead>
                     <TableHead className="font-semibold text-gray-700">
-                      Status
-                    </TableHead>
-                    <TableHead className="font-semibold text-gray-700">
-                      Funds
+                      Raised
                     </TableHead>
                     <TableHead className="font-semibold text-gray-700">
                       Progress
+                    </TableHead>
+                    <TableHead className="font-semibold text-gray-700">
+                      Status
                     </TableHead>
                     <TableHead className="text-right font-semibold text-gray-700">
                       Actions
@@ -490,67 +476,59 @@ export default function AdminDashboard() {
                         <TableCell className="font-medium text-gray-900">
                           {campaign.name}
                         </TableCell>
-                        <TableCell className="text-gray-600 font-mono text-xs">
-                          {campaign.ngoAddress.slice(0, 6)}...{campaign.ngoAddress.slice(-4)}
+                        <TableCell className="text-gray-600">
+                          {campaign.fundGoal?.toFixed(2)} ETH
                         </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={
-                              campaign.status === "active"
-                                ? campaign.isVerified
-                                  ? "bg-green-50 text-green-700 border-green-200 font-medium"
-                                  : "bg-yellow-50 text-yellow-700 border-yellow-200 font-medium"
-                                : "bg-gray-50 text-gray-700 border-gray-200 font-medium"
-                            }
-                          >
-                            {campaign.status === "active"
-                              ? campaign.isVerified
-                                ? "Active"
-                                : "Pending Verification"
-                              : "Completed"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-gray-900 font-medium">
-                          {campaign.fundsRaised?.toFixed(4)} ETH / {campaign.fundGoal?.toFixed(2)} ETH
+                        <TableCell className="font-semibold text-gray-900">
+                          {campaign.fundsRaised?.toFixed(4)} ETH
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <div className="flex-1 bg-gray-200 rounded-full h-2">
+                            <div className="flex-1 bg-gray-200 rounded-full h-2 max-w-[100px]">
                               <div
-                                className="bg-blue-600 h-2 rounded-full"
+                                className="bg-blue-600 h-2 rounded-full transition-all"
                                 style={{
                                   width: `${Math.min(
-                                    ((campaign.fundsRaised || 0) / (campaign.fundGoal || 1)) * 100,
+                                    ((campaign.fundsRaised || 0) /
+                                      (campaign.fundGoal || 1)) *
+                                      100,
                                     100
                                   )}%`,
                                 }}
                               />
                             </div>
-                            <span className="text-xs text-gray-600">
-                              {Math.round(
-                                ((campaign.fundsRaised || 0) / (campaign.fundGoal || 1)) * 100
-                              )}%
+                            <span className="text-sm text-gray-600">
+                              {(
+                                ((campaign.fundsRaised || 0) /
+                                  (campaign.fundGoal || 1)) *
+                                100
+                              ).toFixed(1)}
+                              %
                             </span>
                           </div>
                         </TableCell>
+                        <TableCell>
+                          {campaign.status === "active" ? (
+                            <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
+                              Active
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-100">
+                              Completed
+                            </Badge>
+                          )}
+                        </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            {campaign.status === "active" && !campaign.isVerified && (
+                          <div className="flex items-center justify-end gap-2">
+                            {campaign.status === "active" ? (
                               <Button
-                                variant="ghost"
+                                variant="outline"
                                 size="sm"
-                                className="h-8 text-green-600 hover:text-green-700 hover:bg-green-50 flex items-center gap-1"
-                                onClick={() => handleVerifyCampaign(campaign.id)}
+                                className="text-xs"
                               >
-                                <CheckCircle className="w-4 h-4" />
-                                Verify
+                                View Details
                               </Button>
-                            )}
-                            {campaign.status === "active" && campaign.isVerified && (
-                              <span className="text-sm text-gray-500 italic">Verified</span>
-                            )}
-                            {campaign.status === "completed" && (
+                            ) : (
                               <span className="text-sm text-gray-500 italic">Completed</span>
                             )}
                           </div>
