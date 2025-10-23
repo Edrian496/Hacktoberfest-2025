@@ -5,7 +5,6 @@ import { useRouter, usePathname } from "next/navigation";
 import { useUser } from "@/lib/useUser";
 import { Navigation } from "@/components/ui/navigation";
 import { Footer } from '../../components/ui/footer_user';
-import "../../styles/globals.css";
 import { Manrope, Nunito } from 'next/font/google';
 import { motion } from "framer-motion";
 import Image from "next/image"; 
@@ -90,14 +89,11 @@ export default function PrivateLayout({
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className={`min-h-screen flex flex-col ${manrope.variable} ${nunito.variable} antialiased`}>
       <Navigation />
 
       <div className="flex flex-1">
         <main className="flex-1 p-6">{children}</main>
-        <body
-        className={`${manrope.variable} ${nunito.variable} antialiased`}
-      ></body>
       </div>
 
       <Footer />

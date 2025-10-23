@@ -91,7 +91,7 @@ export default function AdminDashboard() {
   const dashboardRef = useRef<HTMLDivElement>(null);
   const transactionsRef = useRef<HTMLDivElement>(null);
 
-   useEffect(() => {
+  useEffect(() => {
     const checkAdmin = async () => {
       const {
         data: { session },
@@ -120,23 +120,7 @@ export default function AdminDashboard() {
     checkAdmin();
   }, [router]);
 
-  if (loadingAuth) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Checking admin access...</p>
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return null;
-  }
-
-  // Load blockchain data
-  useEffect(() => {
-    loadBlockchainData();
-  }, []);
-
+  // Load blockchain data function
   const loadBlockchainData = async () => {
     try {
       setLoading(true);
@@ -250,11 +234,13 @@ export default function AdminDashboard() {
     }
   };
 
-  const refreshData = async () => {
-    setIsRefreshing(true);
-    await loadBlockchainData();
-    setIsRefreshing(false);
-  };
+  // Load blockchain data when admin is verified
+  useEffect(() => {
+    if (isAdmin && !loadingAuth) {
+      loadBlockchainData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin, loadingAuth]);
 
   // Calculate statistics
   const stats = useMemo(() => {
@@ -287,10 +273,29 @@ export default function AdminDashboard() {
   }, [transactions, searchQuery]);
 
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+  
   const paginatedTransactions = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     return filteredTransactions.slice(startIndex, startIndex + itemsPerPage);
   }, [filteredTransactions, currentPage, itemsPerPage]);
+
+  if (loadingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Checking admin access...</p>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return null;
+  }
+
+  const refreshData = async () => {
+    setIsRefreshing(true);
+    await loadBlockchainData();
+    setIsRefreshing(false);
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
