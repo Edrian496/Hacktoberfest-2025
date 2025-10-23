@@ -1,17 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 import { DisasterCard } from "@/components/ui/disaster-card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@supabase/supabase-js";
 import { ethers } from "ethers";
 import ReliefDonationAbi from "@/abis/ReliefDonation.json";
 import deployment from "@/contracts/deployment.json";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 interface Disaster {
   id: string;
@@ -25,26 +21,70 @@ interface Disaster {
 }
 
 export default function DashboardPage() {
+  // Router for navigation
+  const router = useRouter();
+
+  // Auth state
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loadingAuth, setLoadingAuth] = useState(true);
+  const [userEmail, setUserEmail] = useState<string>("");
+
+  // Campaign state
   const [disasters, setDisasters] = useState<Disaster[]>([]);
   const [donationAmounts, setDonationAmounts] = useState<Record<string, string>>({});
   const [donationMessages, setDonationMessages] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+
+  // Wallet state
   const [walletBalance, setWalletBalance] = useState<string>("0");
   const [walletAddress, setWalletAddress] = useState<string>("");
 
+  // Authentication check
   useEffect(() => {
-    fetchWalletInfo();
-    fetchCampaigns();
-  }, []);
+    const checkAuth = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session || !session.user) {
+          router.replace("/login");
+          return;
+        }
+
+        setUserEmail(session.user.email || "");
+        setIsAuthenticated(true);
+        setLoadingAuth(false);
+      } catch (error) {
+        console.error("Auth check error:", error);
+        router.replace("/login");
+      }
+    };
+
+    checkAuth();
+  }, [router]);
+
+  // Fetch wallet and campaigns after authentication
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchWalletInfo();
+      fetchCampaigns();
+    }
+  }, [isAuthenticated]);
 
   const fetchWalletInfo = async () => {
-    if (!window.ethereum) return;
+    if (!window.ethereum) {
+      console.log("MetaMask not installed");
+      return;
+    }
+
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       await window.ethereum.request({ method: "eth_requestAccounts" });
       const signer = await provider.getSigner();
       const address = await signer.getAddress();
       const balance = await provider.getBalance(address);
+
       setWalletAddress(address);
       setWalletBalance(ethers.formatEther(balance));
       console.log("Wallet connected:", address);
@@ -55,7 +95,11 @@ export default function DashboardPage() {
   };
 
   const fetchCampaigns = async () => {
-    if (!window.ethereum) return;
+    if (!window.ethereum) {
+      console.log("MetaMask not installed");
+      return;
+    }
+
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const reliefContract = new ethers.Contract(
@@ -66,21 +110,21 @@ export default function DashboardPage() {
 
       const campaignCounter = await reliefContract.campaignCounter();
       const totalCampaigns = Number(campaignCounter);
-      
+
       console.log("Total campaigns:", totalCampaigns);
       const campaigns: Disaster[] = [];
 
       for (let i = 1; i <= totalCampaigns; i++) {
         try {
           const campaign = await reliefContract.campaigns(i);
-          
+
           console.log(`Campaign ${i}:`, {
             id: campaign.id.toString(),
             name: campaign.name,
             isVerified: campaign.isVerified,
             isActive: campaign.isActive,
           });
-          
+
           // Only show verified and active campaigns to regular users
           if (campaign.isVerified && campaign.isActive) {
             campaigns.push({
@@ -102,6 +146,7 @@ export default function DashboardPage() {
           console.error(`Error fetching campaign ${i}:`, err);
         }
       }
+
       console.log("Fetched campaigns:", campaigns);
       setDisasters(campaigns);
     } catch (err) {
@@ -115,11 +160,13 @@ export default function DashboardPage() {
         alert("Please install MetaMask!");
         return;
       }
+
       setLoading(true);
+
       const provider = new ethers.BrowserProvider(window.ethereum);
       await window.ethereum.request({ method: "eth_requestAccounts" });
       const signer = await provider.getSigner();
-      
+
       const reliefContract = new ethers.Contract(
         deployment.contracts.ReliefDonation,
         ReliefDonationAbi.abi,
@@ -134,16 +181,18 @@ export default function DashboardPage() {
 
       const valueInWei = ethers.parseEther(amount);
       const message = donationMessages[disasterId]?.trim() || "Thank you for your support!";
+
       console.log("Donating:", amount, "ETH to campaign", disasterId);
-      
+
       const tx = await reliefContract.donate(disasterId, message, { value: valueInWei });
       alert(`Transaction submitted!\nHash: ${tx.hash}`);
+
       await tx.wait();
       alert(`Donation successful! 🎉`);
 
       setDonationAmounts((prev) => ({ ...prev, [disasterId]: "" }));
       setDonationMessages((prev) => ({ ...prev, [disasterId]: "" }));
-      
+
       await fetchWalletInfo();
       await fetchCampaigns();
     } catch (err: any) {
@@ -154,26 +203,68 @@ export default function DashboardPage() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      router.replace("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+  // Loading state
+  if (loadingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="flex min-h-screen bg-background">
       <main className="flex-1 p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
+          {/* Header with user info and logout */}
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-[var(--secondary)]">Dashboard</h1>
+              <p className="text-sm text-muted-foreground">Logged in as: {userEmail}</p>
+            </div>
+            <Button variant="outline" onClick={handleLogout}>
+              Logout
+            </Button>
+          </div>
+
           {/* Wallet Info */}
           <div className="mb-6 p-4 bg-[rgba(0,167,238,0.10)] rounded-lg border border-[var(--secondary)]">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-semibold text-[var(--secondary)] foreground mb-1">Wallet</h1>
-                <p className="font-mono text-s">{walletAddress || "Not connected"}</p>
+                <h2 className="text-2xl font-semibold text-[var(--secondary)] mb-1">Wallet</h2>
+                <p className="font-mono text-sm">{walletAddress || "Not connected"}</p>
               </div>
               <div className="text-right">
-                <p className="text-3sm text-[var(--secondary)] foreground mb-1">Balance</p>
+                <p className="text-sm text-[var(--secondary)] mb-1">Balance</p>
                 <p className="text-xl font-bold">{parseFloat(walletBalance).toFixed(4)} ETH</p>
               </div>
             </div>
+            {!walletAddress && (
+              <Button onClick={fetchWalletInfo} className="mt-4 w-full">
+                Connect Wallet
+              </Button>
+            )}
           </div>
 
           <div className="mb-8">
-            <h1 className="mb-2 text-4xl text-[var(--secondary)] font-bold">Active Disaster Campaigns</h1>
+            <h2 className="mb-2 text-4xl text-[var(--secondary)] font-bold">Active Disaster Campaigns</h2>
             <p className="text-muted-foreground">
               {disasters.length} verified campaign(s) available for donations
             </p>
@@ -202,7 +293,7 @@ export default function DashboardPage() {
                     <p className="text-xs text-muted-foreground">
                       {disaster.fundsRaised?.toFixed(4)} / {disaster.fundGoal?.toFixed(4)} ETH ({progress.toFixed(1)}%)
                     </p>
-                    
+
                     <Input
                       type="text"
                       placeholder="Message (optional)"

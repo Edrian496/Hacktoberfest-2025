@@ -119,10 +119,6 @@ export default function LoginRegisterPage() {
       setError(error.message);
       return;
     }
-
-    // For OAuth, redirect happens automatically, profile creation is usually handled via Supabase function
-    // But if you want, you can create a profile after the user comes back to your app
-    // Example: create a profile if missing in a useEffect on your dashboard/admin page
   };
 
   return (
